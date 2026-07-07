@@ -61,6 +61,9 @@ export const APP_META: Record<AppId, AppMeta> = {
   wordle: { id: "wordle", name: "БобрВорд", color: "from-green-500 to-emerald-700", defaultWidth: 480, defaultHeight: 680, minWidth: 400, minHeight: 580, source: "spim", resizable: true },
   gallery: { id: "gallery", name: "Галерея", color: "from-pink-400 to-rose-600", defaultWidth: 780, defaultHeight: 560, minWidth: 520, minHeight: 400, source: "system", resizable: true },
   taskmanager: { id: "taskmanager", name: "Диспетчер задач", color: "from-zinc-600 to-zinc-800", defaultWidth: 720, defaultHeight: 560, minWidth: 520, minHeight: 400, source: "system", resizable: true },
+  bober3d: { id: "bober3d", name: "Бобр3D", color: "from-zinc-700 to-amber-900", defaultWidth: 800, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
+  parkour: { id: "parkour", name: "БоброПаркур", color: "from-emerald-500 to-green-800", defaultWidth: 800, defaultHeight: 560, minWidth: 520, minHeight: 400, source: "spim", resizable: true },
+  rungun: { id: "rungun", name: "Бобр: Штурм", color: "from-red-600 to-amber-800", defaultWidth: 840, defaultHeight: 560, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [

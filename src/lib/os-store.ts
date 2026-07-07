@@ -6,40 +6,91 @@ import type { AppId, Language, OSVersion, WallpaperId, WindowInstance } from "./
 import { APP_META, PREINSTALLED } from "./app-meta";
 
 export type { OSVersion, Language };
-export type BootPhase = "oobe" | "credits" | "booting" | "desktop";
+export type BootPhase = "bios" | "userSelect" | "oobe" | "credits" | "booting" | "desktop" | "logout";
 
-interface OSState {
-  setupComplete: boolean;
-  userName: string;
-  userAvatar: string;
+export interface UserAccount {
+  id: string;
+  name: string;
+  avatar: string;
   customAvatar: string | null;
+  createdAt: number;
+}
+
+interface UserStateData {
   osVersion: OSVersion;
-  bootPhase: BootPhase;
   language: Language;
   darkMode: boolean;
   volume: number;
   keyboardLayout: "ru" | "en";
-
-  windows: WindowInstance[];
-  zCounter: number;
-  installedApps: AppId[];
   savedApps: AppId[];
-
   bobersoftBalance: number;
   spimBalance: number;
   bobercoinBalance: number;
   cyberboberOwned: boolean;
-
   activated: boolean;
-
   wallpaper: WallpaperId;
+  notepadText: string;
+  antivirusResult: string | null;
+  chatHistory: { from: "me" | "beaver"; text: string }[];
+}
+
+const DEFAULT_USER_STATE: UserStateData = {
+  osVersion: "pro",
+  language: "ru",
+  darkMode: false,
+  volume: 70,
+  keyboardLayout: "ru",
+  savedApps: [],
+  bobersoftBalance: 0,
+  spimBalance: 0,
+  bobercoinBalance: 0,
+  cyberboberOwned: false,
+  activated: false,
+  wallpaper: "default",
+  notepadText: "Добро пожаловать в Блокнот BoberOS!\n\nЗдесь можно писать заметки.\nБобёр одобряет.",
+  antivirusResult: null,
+  chatHistory: [{ from: "beaver", text: "Привет! Я Бобёр-помощник. О чём поговорим?" }],
+};
+
+interface OSState {
+  users: UserAccount[];
+  currentUserId: string | null;
+  userStates: Record<string, UserStateData>;
+
+  userName: string;
+  userAvatar: string;
+  customAvatar: string | null;
+  bootPhase: BootPhase;
   bsod: boolean;
+
+  windows: WindowInstance[];
+  zCounter: number;
+  installedApps: AppId[];
+
+  osVersion: OSVersion;
+  language: Language;
+  darkMode: boolean;
+  volume: number;
+  keyboardLayout: "ru" | "en";
+  savedApps: AppId[];
+  bobersoftBalance: number;
+  spimBalance: number;
+  bobercoinBalance: number;
+  cyberboberOwned: boolean;
+  activated: boolean;
+  wallpaper: WallpaperId;
   notepadText: string;
   antivirusResult: string | null;
   chatHistory: { from: "me" | "beaver"; text: string }[];
 
   setBootPhase: (p: BootPhase) => void;
-  completeSetup: (data: { name: string; avatar: string; version: OSVersion; activated: boolean; language: Language }) => void;
+  startBios: () => void;
+  finishBios: () => void;
+  loginUser: (id: string) => void;
+  logoutUser: () => void;
+  deleteUser: (id: string) => void;
+  completeSetup: (data: { name: string; avatar: string; customPhoto: string | null; version: OSVersion; activated: boolean; language: Language }) => void;
+
   setLanguage: (l: Language) => void;
   toggleDarkMode: () => void;
   setDarkMode: (v: boolean) => void;
@@ -80,53 +131,165 @@ interface OSState {
 }
 
 let idCounter = 1;
+let userIdCounter = 1;
+
+function makeUserId(): string {
+  const u = `user-${userIdCounter++}-${Date.now().toString(36)}`;
+  return u;
+}
+
+function activeToUserState(s: OSState): UserStateData {
+  return {
+    osVersion: s.osVersion,
+    language: s.language,
+    darkMode: s.darkMode,
+    volume: s.volume,
+    keyboardLayout: s.keyboardLayout,
+    savedApps: s.savedApps,
+    bobersoftBalance: s.bobersoftBalance,
+    spimBalance: s.spimBalance,
+    bobercoinBalance: s.bobercoinBalance,
+    cyberboberOwned: s.cyberboberOwned,
+    activated: s.activated,
+    wallpaper: s.wallpaper,
+    notepadText: s.notepadText,
+    antivirusResult: s.antivirusResult,
+    chatHistory: s.chatHistory,
+  };
+}
 
 export const useOS = create<OSState>()(
   persist(
     (set, get) => ({
-      setupComplete: false,
+      users: [],
+      currentUserId: null,
+      userStates: {},
+
       userName: "Бобёр",
       userAvatar: "🐹",
       customAvatar: null,
-      osVersion: "pro",
-      bootPhase: "oobe",
-      language: "ru",
-      darkMode: false,
-      volume: 70,
-      keyboardLayout: "ru",
+      bootPhase: "bios",
+      bsod: false,
 
       windows: [],
       zCounter: 10,
       installedApps: [...PREINSTALLED],
+
+      ...DEFAULT_USER_STATE,
       savedApps: [],
-
-      bobersoftBalance: 0,
-      spimBalance: 0,
-      bobercoinBalance: 0,
-      cyberboberOwned: false,
-      activated: false,
-
-      wallpaper: "default",
-      bsod: false,
-      notepadText:
-        "Добро пожаловать в Блокнот BoberOS!\n\nЗдесь можно писать заметки.\nБобёр одобряет.",
-      antivirusResult: null,
-      chatHistory: [
-        { from: "beaver", text: "Привет! Я Бобёр-помощник. О чём поговорим?" },
-      ],
 
       setBootPhase: (p) => set({ bootPhase: p }),
 
-      completeSetup: (data) =>
+      startBios: () => set({ bootPhase: "bios" }),
+
+      finishBios: () => {
+        const s = get();
+        if (s.users.length > 0) {
+          set({ bootPhase: "userSelect" });
+        } else {
+          set({ bootPhase: "oobe" });
+        }
+      },
+
+      loginUser: (id) => {
+        const s = get();
+        const user = s.users.find((u) => u.id === id);
+        if (!user) return;
+        const data = s.userStates[id] || DEFAULT_USER_STATE;
+        const sessionExtras = [...data.savedApps];
+        if (data.cyberboberOwned && !sessionExtras.includes("cyberbober")) sessionExtras.push("cyberbober");
         set({
-          setupComplete: true,
-          userName: data.name || "Бобёр",
-          userAvatar: data.avatar,
-          osVersion: data.version,
-          activated: data.activated,
+          currentUserId: id,
+          userName: user.name,
+          userAvatar: user.avatar,
+          customAvatar: user.customAvatar,
+          windows: [],
+          zCounter: 10,
+          installedApps: [...PREINSTALLED, ...sessionExtras],
+          bootPhase: "booting",
+          osVersion: data.osVersion,
           language: data.language,
+          darkMode: data.darkMode,
+          volume: data.volume,
+          keyboardLayout: data.keyboardLayout,
+          savedApps: data.savedApps,
+          bobersoftBalance: data.bobersoftBalance,
+          spimBalance: data.spimBalance,
+          bobercoinBalance: data.bobercoinBalance,
+          cyberboberOwned: data.cyberboberOwned,
+          activated: data.activated,
+          wallpaper: data.wallpaper,
+          notepadText: data.notepadText,
+          antivirusResult: data.antivirusResult,
+          chatHistory: data.chatHistory,
+        });
+      },
+
+      logoutUser: () => {
+        const s = get();
+        if (s.currentUserId) {
+          const data = activeToUserState(s);
+          set((st) => ({
+            userStates: { ...st.userStates, [s.currentUserId!]: data },
+            currentUserId: null,
+            bootPhase: "userSelect",
+            windows: [],
+          }));
+        }
+      },
+
+      deleteUser: (id) => {
+        set((s) => {
+          const users = s.users.filter((u) => u.id !== id);
+          const userStates = { ...s.userStates };
+          delete userStates[id];
+          return {
+            users,
+            userStates,
+            currentUserId: s.currentUserId === id ? null : s.currentUserId,
+            bootPhase: users.length > 0 ? "userSelect" : "oobe",
+          };
+        });
+      },
+
+      completeSetup: (data) => {
+        const id = makeUserId();
+        const user: UserAccount = {
+          id,
+          name: data.name || "Бобёр",
+          avatar: data.avatar,
+          customAvatar: data.customPhoto,
+          createdAt: Date.now(),
+        };
+        const userData: UserStateData = {
+          ...DEFAULT_USER_STATE,
+          osVersion: data.version,
+          language: data.language,
+          activated: data.activated,
+        };
+        userData.savedApps = [];
+        const sessionExtras = [...userData.savedApps];
+        if (userData.cyberboberOwned && !sessionExtras.includes("cyberbober")) sessionExtras.push("cyberbober");
+        set((s) => ({
+          users: [...s.users, user],
+          userStates: { ...s.userStates, [id]: userData },
+          currentUserId: id,
+          userName: user.name,
+          userAvatar: user.avatar,
+          customAvatar: user.customAvatar,
+          osVersion: userData.osVersion,
+          language: userData.language,
+          activated: userData.activated,
+          windows: [],
+          zCounter: 10,
+          installedApps: [...PREINSTALLED, ...sessionExtras],
+          savedApps: [],
+          bobersoftBalance: 0,
+          spimBalance: 0,
+          bobercoinBalance: 0,
           bootPhase: "credits",
-        }),
+        }));
+      },
 
       setLanguage: (l) => set({ language: l }),
       toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
@@ -147,79 +310,51 @@ export const useOS = create<OSState>()(
         const offset = (state.windows.length % 6) * 28;
         const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
         const vh = typeof window !== "undefined" ? window.innerHeight : 720;
-        const width = Math.min(meta.defaultWidth, vw - 40);
-        const height = Math.min(meta.defaultHeight, vh - 100);
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+        const width = Math.min(isMobile ? vw - 8 : meta.defaultWidth, vw - 8);
+        const height = Math.min(isMobile ? vh - 120 : meta.defaultHeight, vh - 100);
         const win: WindowInstance = {
           id,
           appId,
-          x: Math.max(12, (vw - width) / 2 - 60 + offset),
-          y: Math.max(12, (vh - height) / 2 - 40 + offset),
+          x: isMobile ? 4 : Math.max(12, (vw - width) / 2 - 60 + offset),
+          y: isMobile ? 8 : Math.max(12, (vh - height) / 2 - 40 + offset),
           width,
           height,
           zIndex: z,
           minimized: false,
-          maximized: false,
+          maximized: isMobile,
         };
         set({ windows: [...state.windows, win], zCounter: z });
       },
 
-      closeWindow: (id) =>
-        set((s) => ({ windows: s.windows.filter((w) => w.id !== id) })),
+      closeWindow: (id) => set((s) => ({ windows: s.windows.filter((w) => w.id !== id) })),
 
       focusWindow: (id) =>
         set((s) => {
           const z = s.zCounter + 1;
-          return {
-            zCounter: z,
-            windows: s.windows.map((w) =>
-              w.id === id ? { ...w, zIndex: z, minimized: false } : w
-            ),
-          };
+          return { zCounter: z, windows: s.windows.map((w) => (w.id === id ? { ...w, zIndex: z, minimized: false } : w)) };
         }),
 
       minimizeWindow: (id) =>
-        set((s) => ({
-          windows: s.windows.map((w) =>
-            w.id === id ? { ...w, minimized: true } : w
-          ),
-        })),
+        set((s) => ({ windows: s.windows.map((w) => (w.id === id ? { ...w, minimized: true } : w)) })),
 
       restoreWindow: (id) =>
         set((s) => {
           const z = s.zCounter + 1;
-          return {
-            zCounter: z,
-            windows: s.windows.map((w) =>
-              w.id === id ? { ...w, minimized: false, zIndex: z } : w
-            ),
-          };
+          return { zCounter: z, windows: s.windows.map((w) => (w.id === id ? { ...w, minimized: false, zIndex: z } : w)) };
         }),
 
       toggleMaximize: (id) =>
-        set((s) => ({
-          windows: s.windows.map((w) =>
-            w.id === id ? { ...w, maximized: !w.maximized } : w
-          ),
-        })),
+        set((s) => ({ windows: s.windows.map((w) => (w.id === id ? { ...w, maximized: !w.maximized } : w)) })),
 
       moveWindow: (id, x, y) =>
-        set((s) => ({
-          windows: s.windows.map((w) => (w.id === id ? { ...w, x, y } : w)),
-        })),
+        set((s) => ({ windows: s.windows.map((w) => (w.id === id ? { ...w, x, y } : w)) })),
 
       resizeWindow: (id, width, height) =>
-        set((s) => ({
-          windows: s.windows.map((w) =>
-            w.id === id ? { ...w, width, height } : w
-          ),
-        })),
+        set((s) => ({ windows: s.windows.map((w) => (w.id === id ? { ...w, width, height } : w)) })),
 
       installApp: (appId) =>
-        set((s) =>
-          s.installedApps.includes(appId)
-            ? s
-            : { installedApps: [...s.installedApps, appId] }
-        ),
+        set((s) => (s.installedApps.includes(appId) ? s : { installedApps: [...s.installedApps, appId] })),
 
       uninstallApp: (appId) =>
         set((s) => ({
@@ -227,40 +362,36 @@ export const useOS = create<OSState>()(
           windows: s.windows.filter((w) => w.appId !== appId),
         })),
 
-      saveProgress: () =>
-        set((s) => ({
-          savedApps: s.installedApps.filter((a) => !PREINSTALLED.includes(a)),
-        })),
+      saveProgress: () => {
+        const s = get();
+        if (!s.currentUserId) return;
+        const data = activeToUserState(s);
+        set((st) => ({ userStates: { ...st.userStates, [s.currentUserId!]: data }, savedApps: data.savedApps }));
+      },
 
       hasUnsavedChanges: () => {
         const s = get();
+        if (!s.currentUserId) return false;
         const current = [...s.installedApps].filter((a) => !PREINSTALLED.includes(a)).sort();
         const saved = [...s.savedApps].sort();
         if (current.length !== saved.length) return true;
         return current.some((a, i) => a !== saved[i]);
       },
 
-      clickCoin: (amount = 100) =>
-        set((s) => ({ bobercoinBalance: s.bobercoinBalance + amount })),
+      clickCoin: (amount = 100) => set((s) => ({ bobercoinBalance: s.bobercoinBalance + amount })),
 
       withdrawToBoberSoft: (amount) =>
         set((s) => {
           const amt = amount ?? s.bobercoinBalance;
           if (amt <= 0 || amt > s.bobercoinBalance) return s;
-          return {
-            bobercoinBalance: s.bobercoinBalance - amt,
-            bobersoftBalance: s.bobersoftBalance + amt,
-          };
+          return { bobercoinBalance: s.bobercoinBalance - amt, bobersoftBalance: s.bobersoftBalance + amt };
         }),
 
       withdrawToSpim: (amount) =>
         set((s) => {
           const amt = amount ?? s.bobercoinBalance;
           if (amt <= 0 || amt > s.bobercoinBalance) return s;
-          return {
-            bobercoinBalance: s.bobercoinBalance - amt,
-            spimBalance: s.spimBalance + amt,
-          };
+          return { bobercoinBalance: s.bobercoinBalance - amt, spimBalance: s.spimBalance + amt };
         }),
 
       buyCyberBober: () =>
@@ -270,9 +401,7 @@ export const useOS = create<OSState>()(
           return {
             spimBalance: s.spimBalance - 3500,
             cyberboberOwned: true,
-            installedApps: s.installedApps.includes("cyberbober")
-              ? s.installedApps
-              : [...s.installedApps, "cyberbober"],
+            installedApps: s.installedApps.includes("cyberbober") ? s.installedApps : [...s.installedApps, "cyberbober"],
           };
         }),
 
@@ -283,93 +412,76 @@ export const useOS = create<OSState>()(
           return { bobersoftBalance: s.bobersoftBalance - 500, activated: true };
         }),
 
-      activateWithKey: () =>
-        set((s) => (s.activated ? s : { activated: true })),
+      activateWithKey: () => set((s) => (s.activated ? s : { activated: true })),
 
       setWallpaper: (w) => set({ wallpaper: w }),
       setNotepadText: (t) => set({ notepadText: t }),
       setAntivirusResult: (r) => set({ antivirusResult: r }),
       addChatMessage: (from, text) =>
         set((s) => ({ chatHistory: [...s.chatHistory, { from, text }].slice(-80) })),
-      setUserName: (n) => set({ userName: n }),
-      setUserAvatar: (a) => set({ userAvatar: a }),
-      setCustomAvatar: (a) => set({ customAvatar: a }),
+      setUserName: (n) => {
+        const s = get();
+        if (!s.currentUserId) { set({ userName: n }); return; }
+        set((st) => ({
+          userName: n,
+          users: st.users.map((u) => (u.id === s.currentUserId ? { ...u, name: n } : u)),
+        }));
+      },
+      setUserAvatar: (a) => {
+        const s = get();
+        if (!s.currentUserId) { set({ userAvatar: a }); return; }
+        set((st) => ({
+          userAvatar: a,
+          users: st.users.map((u) => (u.id === s.currentUserId ? { ...u, avatar: a } : u)),
+        }));
+      },
+      setCustomAvatar: (a) => {
+        const s = get();
+        if (!s.currentUserId) { set({ customAvatar: a }); return; }
+        set((st) => ({
+          customAvatar: a,
+          users: st.users.map((u) => (u.id === s.currentUserId ? { ...u, customAvatar: a } : u)),
+        }));
+      },
 
       triggerBSOD: () => set({ bsod: true }),
 
-      reboot: () =>
-        set((s) => {
-          const base = [...PREINSTALLED];
-          const sessionExtras = [...s.savedApps];
-          if (s.cyberboberOwned && !sessionExtras.includes("cyberbober"))
-            sessionExtras.push("cyberbober");
-          return {
+      reboot: () => {
+        const s = get();
+        if (s.currentUserId) {
+          const data = activeToUserState(s);
+          set((st) => ({
+            userStates: { ...st.userStates, [s.currentUserId!]: data },
             bsod: false,
-            bootPhase: "booting",
+            bootPhase: "bios",
             windows: [],
             zCounter: 10,
-            installedApps: [...base, ...sessionExtras],
-          };
-        }),
+            installedApps: [...PREINSTALLED, ...data.savedApps, ...(data.cyberboberOwned && !data.savedApps.includes("cyberbober") ? ["cyberbober" as AppId] : [])],
+          }));
+        } else {
+          set({ bsod: false, bootPhase: "bios", windows: [], zCounter: 10 });
+        }
+      },
     }),
     {
       name: "boberos-state",
-      version: 3,
+      version: 4,
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<OSState>;
         const merged = { ...current, ...p };
-        const extras = p.savedApps ?? [];
-        merged.installedApps = [...PREINSTALLED, ...extras];
-        if (p.cyberboberOwned && !merged.installedApps.includes("cyberbober"))
-          merged.installedApps.push("cyberbober");
-        return merged;
-      },
-      migrate: (persisted: unknown) => {
-        const p = (persisted ?? {}) as Record<string, unknown>;
-        const state = (p.state ?? {}) as Record<string, unknown>;
-        if (state.savedApps === undefined && Array.isArray(state.installedApps)) {
-          state.savedApps = (state.installedApps as AppId[]).filter(
-            (a) => !PREINSTALLED.includes(a)
-          );
+        if (!Array.isArray(merged.users)) merged.users = [];
+        if (!merged.userStates || typeof merged.userStates !== "object") merged.userStates = {};
+        if (merged.users.length > 0 && !merged.currentUserId) {
+          merged.bootPhase = "userSelect";
+        } else if (merged.users.length === 0) {
+          merged.bootPhase = "bios";
         }
-        if (state.setupComplete === undefined) {
-          state.setupComplete = true;
-          state.bootPhase = "desktop";
-        }
-        if (state.userName === undefined) state.userName = "Бобёр";
-        if (state.userAvatar === undefined) state.userAvatar = "🐹";
-        if (state.customAvatar === undefined) state.customAvatar = null;
-        if (state.osVersion === undefined) state.osVersion = "pro";
-        if (state.bootPhase === undefined) state.bootPhase = "booting";
-        if (state.language === undefined) state.language = "ru";
-        if (state.darkMode === undefined) state.darkMode = false;
-        if (state.volume === undefined) state.volume = 70;
-        if (state.keyboardLayout === undefined) state.keyboardLayout = "ru";
-        if (state.spimBalance === undefined) {
-          state.spimBalance = (state.bobersoftBalance as number) ?? 0;
-        }
-        if (state.chatHistory === undefined) state.chatHistory = [];
-        return p as typeof persisted;
+        return merged as OSState;
       },
       partialize: (s) => ({
-        setupComplete: s.setupComplete,
-        userName: s.userName,
-        userAvatar: s.userAvatar,
-        customAvatar: s.customAvatar,
-        osVersion: s.osVersion,
-        language: s.language,
-        darkMode: s.darkMode,
-        volume: s.volume,
-        keyboardLayout: s.keyboardLayout,
-        savedApps: s.savedApps,
-        bobersoftBalance: s.bobersoftBalance,
-        spimBalance: s.spimBalance,
-        bobercoinBalance: s.bobercoinBalance,
-        cyberboberOwned: s.cyberboberOwned,
-        activated: s.activated,
-        wallpaper: s.wallpaper,
-        notepadText: s.notepadText,
-        chatHistory: s.chatHistory,
+        users: s.users,
+        currentUserId: s.currentUserId,
+        userStates: s.userStates,
       }),
     }
   )

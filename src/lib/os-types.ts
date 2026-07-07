@@ -48,7 +48,10 @@ export type AppId =
   | "connect4"
   | "wordle"
   | "gallery"
-  | "taskmanager";
+  | "taskmanager"
+  | "bober3d"
+  | "parkour"
+  | "rungun";
 
 export type Language = "ru" | "en";
 

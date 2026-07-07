@@ -27,9 +27,10 @@ export function WindowFrame({ win, children }: WindowFrameProps) {
   } = useOS();
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
   const resizeRef = useRef<{ sx: number; sy: number; sw: number; sh: number } | null>(null);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   const onTitlePointerDown = (e: PointerEvent) => {
-    if (win.maximized) return;
+    if (win.maximized || isMobile) return;
     if ((e.target as HTMLElement).closest("button")) return;
     focusWindow(win.id);
     dragRef.current = { dx: e.clientX - win.x, dy: e.clientY - win.y };
@@ -125,8 +126,7 @@ export function WindowFrame({ win, children }: WindowFrameProps) {
         {children}
       </div>
 
-      {/* resize handle */}
-      {meta.resizable !== false && !win.maximized && (
+      {meta.resizable !== false && !win.maximized && !isMobile && (
         <div
           className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"
           onPointerDown={onResizePointerDown}

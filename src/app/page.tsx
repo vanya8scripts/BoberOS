@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { useOS } from "@/lib/os-store";
+import { BiosScreen } from "@/components/os/BiosScreen";
+import { UserSelect } from "@/components/os/UserSelect";
 import { OOBE } from "@/components/os/OOBE";
 import { CreditsSplash } from "@/components/os/CreditsSplash";
 import { BootScreen } from "@/components/os/BootScreen";
@@ -13,7 +15,6 @@ import { ShutdownDialog } from "@/components/os/ShutdownDialog";
 
 export default function Home() {
   const bootPhase = useOS((s) => s.bootPhase);
-  const setupComplete = useOS((s) => s.setupComplete);
   const bsod = useOS((s) => s.bsod);
   const darkMode = useOS((s) => s.darkMode);
 
@@ -22,14 +23,14 @@ export default function Home() {
     else document.documentElement.classList.remove("dark");
   }, [darkMode]);
 
-  const phase = !setupComplete ? "oobe" : bootPhase;
-
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black font-sans select-none">
-      {phase === "oobe" && <OOBE />}
-      {phase === "credits" && <CreditsSplash />}
-      {phase === "booting" && <BootScreen />}
-      {phase === "desktop" && (
+    <main className="relative h-[100dvh] w-screen overflow-hidden bg-black font-sans select-none">
+      {bootPhase === "bios" && <BiosScreen />}
+      {bootPhase === "userSelect" && <UserSelect />}
+      {bootPhase === "oobe" && <OOBE />}
+      {bootPhase === "credits" && <CreditsSplash />}
+      {bootPhase === "booting" && <BootScreen />}
+      {bootPhase === "desktop" && (
         <>
           <Desktop />
           <WindowManager />

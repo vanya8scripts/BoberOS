@@ -19,7 +19,6 @@ const INSTALL_STEPS: Record<Language, string[]> = {
 
 export function OOBE() {
   const completeSetup = useOS((s) => s.completeSetup);
-  const setCustomAvatar = useOS((s) => s.setCustomAvatar);
   const [step, setStep] = useState<Step>("language");
   const [lang, setLang] = useState<Language>("ru");
   const [name, setName] = useState("");
@@ -69,8 +68,7 @@ export function OOBE() {
       if (p >= 100) {
         clearInterval(iv);
         setTimeout(() => {
-          if (customPhoto) setCustomAvatar(customPhoto);
-          completeSetup({ name: name.trim() || (lang === "en" ? "Beaver" : "Бобёр"), avatar, version, activated: willActivate, language: lang });
+          completeSetup({ name: name.trim() || (lang === "en" ? "Beaver" : "Бобёр"), avatar, customPhoto, version, activated: willActivate, language: lang });
         }, 400);
       }
     }, 40);

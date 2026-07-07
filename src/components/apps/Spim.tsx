@@ -39,6 +39,9 @@ const GAMES: GameItem[] = [
   { appId: "sudoku", price: 0, tagline: "Судоку 9x9. 3 уровня сложности, заметки.", rating: 4.6, genre: "Головоломка", size: "4 МБ", tag: "NEW" },
   { appId: "connect4", price: 0, tagline: "Четыре в ряд против бобра. Стратегия решает!", rating: 4.5, genre: "Логика", size: "4 МБ", tag: "NEW" },
   { appId: "wordle", price: 0, tagline: "Угадай бобро-слово за 6 попыток. Wordle!", rating: 4.7, genre: "Слова", size: "3 МБ", tag: "NEW" },
+  { appId: "bober3d", price: 0, tagline: "3D-шутер! Исследуй лабиринт и стреляй барсуков.", rating: 4.9, genre: "3D / Шутер", size: "12 МБ", tag: "3D" },
+  { appId: "parkour", price: 0, tagline: "Паркур: wall-jump, рывок, двойной прыжок!", rating: 4.8, genre: "Паркур", size: "8 МБ", tag: "NEW" },
+  { appId: "rungun", price: 0, tagline: "Run-and-gun: волны барсуков и битва с боссом!", rating: 4.9, genre: "Шутер", size: "10 МБ", tag: "HIT" },
 ];
 
 const COMING_SOON_GAMES = [
@@ -201,6 +204,7 @@ function gameName(appId: AppId) {
     memory: "Память", rps: "Камень-Ножницы-Бумага", tictactoe: "Крестики-нолики", whackamole: "Реакция Бобра",
     tetris: "Тетрис Бобра", pong: "Пинг-Понг Бобра", breakout: "Арканоид Бобра", sokoban: "Сокобан Бобра",
     fifteen: "Пятнашки", hangman: "Виселица", simon: "Симон",
+    bober3d: "Бобр3D", parkour: "БоброПаркур", rungun: "Бобр: Штурм",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];

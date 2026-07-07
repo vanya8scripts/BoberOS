@@ -30,6 +30,9 @@ import { Connect4 } from "@/components/apps/Connect4";
 import { Wordle } from "@/components/apps/Wordle";
 import { Gallery } from "@/components/apps/Gallery";
 import { TaskManager } from "@/components/apps/TaskManager";
+import { Bober3D } from "@/components/apps/Bober3D";
+import { Parkour } from "@/components/apps/Parkour";
+import { RunGun } from "@/components/apps/RunGun";
 import { MyBober } from "@/components/apps/MyBober";
 import { Notepad } from "@/components/apps/Notepad";
 import { Settings } from "@/components/apps/Settings";
@@ -63,6 +66,7 @@ const APP_COMPONENTS: Record<AppId, React.ComponentType> = {
   fifteen: Fifteen, hangman: Hangman, simon: Simon,
   dinorunner: DinoRunner, sudoku: Sudoku, connect4: Connect4, wordle: Wordle,
   gallery: Gallery, taskmanager: TaskManager,
+  bober3d: Bober3D, parkour: Parkour, rungun: RunGun,
   mybober: MyBober, notepad: Notepad, settings: Settings, calculator: Calculator,
   boberchat: BoberChat, boberbrowser: BoberBrowser, boberterminal: BoberTerminal,
   boberclock: BoberClock, bobertunes: BoberTunes, registryeditor: RegistryEditor,

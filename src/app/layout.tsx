@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,9 +15,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BoberOS — ОС для настоящих грызунов",
-  description: "Шуточная операционная система BoberOS. 45+ приложений, 21 игра, установщик, тёмная тема и многое другое. created by vanya8.",
-  keywords: ["BoberOS", "бобёр", "ОС", "шуточная", "игры", "Next.js", "vanya8"],
-  authors: [{ name: "vanya8" }],
+  description: "Шуточная операционная система BoberOS. 45+ приложений, 21 игра, установщик, тёмная тема и многое другое.",
+  keywords: ["BoberOS", "бобёр", "ОС", "шуточная", "игры", "Next.js"],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0a3d5c",
 };
 
 export default function RootLayout({

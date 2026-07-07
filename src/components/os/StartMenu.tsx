@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Power, Search, Save } from "lucide-react";
+import { Power, Search, Save, LogOut } from "lucide-react";
 import { useOS } from "@/lib/os-store";
 import { APP_META, VERSION_LABEL } from "@/lib/app-meta";
 import { AppIcon } from "./AppIcon";
@@ -21,8 +21,14 @@ export function StartMenu({ onClose }: StartMenuProps) {
   const customAvatar = useOS((s) => s.customAvatar);
   const osVersion = useOS((s) => s.osVersion);
   const activated = useOS((s) => s.activated);
+  const logoutUser = useOS((s) => s.logoutUser);
   const [q, setQ] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
+
+  const handleLogout = () => {
+    onClose();
+    logoutUser();
+  };
 
   const filtered = installedApps.filter((a) =>
     APP_META[a].name.toLowerCase().includes(q.toLowerCase())
@@ -102,6 +108,13 @@ export function StartMenu({ onClose }: StartMenuProps) {
               {hasUnsavedChanges() && !savedFlash && (
                 <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
               )}
+            </button>
+            <button
+              onClick={handleLogout}
+              title="Сменить пользователя"
+              className="grid h-8 w-8 place-items-center rounded-lg text-white/60 hover:bg-white/10"
+            >
+              <LogOut className="h-4 w-4" />
             </button>
             <button
               onClick={handlePower}

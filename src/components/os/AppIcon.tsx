@@ -29,6 +29,7 @@ const ICONS: Record<AppId, LucideIcon> = {
   fifteen: Grid3x3, hangman: LetterText, simon: Radio,
   dinorunner: Activity, sudoku: Grid3x3, connect4: Grid3x3, wordle: LetterText,
   gallery: ImageIcon, taskmanager: Activity,
+  bober3d: Blocks, parkour: Activity, rungun: Crosshair,
 };
 
 interface AppIconProps {
