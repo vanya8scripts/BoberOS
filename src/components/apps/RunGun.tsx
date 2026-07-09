@@ -397,7 +397,19 @@ function playerShoot(g: GameData): void {
   const p = g.player;
   const bx = p.facing === 1 ? p.x + p.w + 18 : p.x - 8;
   const by = p.y + 30;
-  g.bullets.push({ x: bx, y: by, vx: BULLET_SPEED * p.facing, vy: 0, from: "player", life: 80, r: 5, grenade: false });
+  let vy = 0;
+  let bestDist = 99999;
+  for (const e of g.enemies) {
+    if (e.health <= 0) continue;
+    if (e.x + e.w < p.x - 20 && p.facing === 1) continue;
+    if (e.x > p.x + p.w + 20 && p.facing === -1) continue;
+    const dx = (e.x + e.w / 2) - (p.x + p.w / 2);
+    const dy = (e.y + e.h / 2) - by;
+    const dist = Math.abs(dx) + Math.abs(dy);
+    if (dist < bestDist) { bestDist = dist; vy = dy / Math.max(1, Math.abs(dx)) * BULLET_SPEED * 0.45; }
+  }
+  vy = Math.max(-9, Math.min(9, vy));
+  g.bullets.push({ x: bx, y: by, vx: BULLET_SPEED * p.facing, vy, from: "player", life: 80, r: 5, grenade: false });
   p.muzzle = 5; g.fireCd = FIRE_CD;
   for (let i = 0; i < 3; i++) {
     g.particles.push({ x: bx, y: by, vx: p.facing * (2 + Math.random() * 2), vy: (Math.random() - 0.5) * 2, life: 8, maxLife: 8, color: "#ffd24a", size: 2.5, gravity: 0 });

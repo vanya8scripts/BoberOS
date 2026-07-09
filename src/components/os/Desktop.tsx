@@ -12,6 +12,7 @@ export function Desktop() {
   const openApp = useOS((s) => s.openApp);
   const wallpaper = useOS((s) => s.wallpaper);
   const activated = useOS((s) => s.activated);
+  const language = useOS((s) => s.language);
   const openAppById = useOS((s) => s.openApp);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -105,7 +106,7 @@ export function Desktop() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
           </span>
-          Активируйте BoberOS в настройках
+          {language === "en" ? "Activate BoberOS in settings" : "Активируйте BoberOS в настройках"}
         </button>
       )}
     </div>

@@ -474,8 +474,11 @@ function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, cam
   for (let i = -1; i < w / 34 + 2; i++) {
     ctx.fillRect(i * 34 - roff, riverY + 8, 16, 2);
   }
+  drawTreeLine(ctx, w, h, camX * 0.25, h * 0.72 - camY * 0.07, "#7ab048", 95);
   drawTreeLine(ctx, w, h, camX * 0.45, h * 0.78 - camY * 0.1, "#5a8a3a", 70);
+  drawTreeLine(ctx, w, h, camX * 0.65, h * 0.84 - camY * 0.14, "#4a7a2e", 52);
   drawTreeLine(ctx, w, h, camX * 0.8, h * 0.88 - camY * 0.18, "#3f6a2a", 46);
+  drawTreeLine(ctx, w, h, camX * 1.0, h * 0.92 - camY * 0.22, "#2f5a20", 38);
 }
 
 export function Parkour() {

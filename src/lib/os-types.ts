@@ -51,7 +51,9 @@ export type AppId =
   | "taskmanager"
   | "bober3d"
   | "parkour"
-  | "rungun";
+  | "rungun"
+  | "voxelsandbox"
+  | "boberstrike";
 
 export type Language = "ru" | "en";
 

@@ -17,6 +17,8 @@ export function ShutdownDialog() {
   const reboot = useOS((s) => s.reboot);
   const saveProgress = useOS((s) => s.saveProgress);
   const hasUnsavedChanges = useOS((s) => s.hasUnsavedChanges);
+  const language = useOS((s) => s.language);
+  const en = language === "en";
 
   if (!open) return null;
 
@@ -36,11 +38,11 @@ export function ShutdownDialog() {
             <AlertTriangle className="h-7 w-7 text-amber-600" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-zinc-800">Хотите выйти?</h2>
+            <h2 className="text-lg font-bold text-zinc-800">{en ? "Want to exit?" : "Хотите выйти?"}</h2>
             <p className="mt-1 text-sm text-zinc-500">
               {unsaved
-                ? "У вас есть несохранённые изменения. Вы можете сохранить прогресс перед выходом."
-                : "Все изменения уже сохранены. Можно спокойно выходить."}
+                ? (en ? "You have unsaved changes. You can save before exiting." : "У вас есть несохранённые изменения. Вы можете сохранить прогресс перед выходом.")
+                : (en ? "All changes saved. Safe to exit." : "Все изменения уже сохранены. Можно спокойно выходить.")}
             </p>
           </div>
           <button
@@ -59,8 +61,8 @@ export function ShutdownDialog() {
             >
               <Save className="h-5 w-5" />
               <div>
-                <p className="text-sm font-bold">Сохранить и выйти</p>
-                <p className="text-[11px] text-white/80">Прогресс будет сохранён</p>
+                <p className="text-sm font-bold">{en ? "Save and exit" : "Сохранить и выйти"}</p>
+                <p className="text-[11px] text-white/80">{en ? "Progress will be saved" : "Прогресс будет сохранён"}</p>
               </div>
             </button>
           )}
@@ -73,9 +75,9 @@ export function ShutdownDialog() {
           >
             <Power className="h-5 w-5" />
             <div>
-              <p className="text-sm font-bold">{unsaved ? "Выйти без сохранения" : "Выключить"}</p>
+              <p className="text-sm font-bold">{unsaved ? (en ? "Exit without saving" : "Выйти без сохранения") : (en ? "Power off" : "Выключить")}</p>
               <p className={cn("text-[11px]", unsaved ? "text-zinc-500" : "text-white/80")}>
-                {unsaved ? "Несохранённые приложения будут потеряны" : "Перезагрузка BoberOS"}
+                {unsaved ? (en ? "Unsaved apps will be lost" : "Несохранённые приложения будут потеряны") : (en ? "Restart BoberOS" : "Перезагрузка BoberOS")}
               </p>
             </div>
           </button>
@@ -83,7 +85,7 @@ export function ShutdownDialog() {
             onClick={() => setOpen(false)}
             className="w-full rounded-xl px-4 py-2.5 text-center text-sm text-zinc-500 hover:bg-zinc-100"
           >
-            Отмена
+            {en ? "Cancel" : "Отмена"}
           </button>
         </div>
       </div>

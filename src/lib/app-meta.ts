@@ -64,6 +64,8 @@ export const APP_META: Record<AppId, AppMeta> = {
   bober3d: { id: "bober3d", name: "Бобр3D", color: "from-zinc-700 to-amber-900", defaultWidth: 800, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
   parkour: { id: "parkour", name: "БоброПаркур", color: "from-emerald-500 to-green-800", defaultWidth: 800, defaultHeight: 560, minWidth: 520, minHeight: 400, source: "spim", resizable: true },
   rungun: { id: "rungun", name: "Бобр: Штурм", color: "from-red-600 to-amber-800", defaultWidth: 840, defaultHeight: 560, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
+  voxelsandbox: { id: "voxelsandbox", name: "БобрКрафт", color: "from-emerald-600 to-green-900", defaultWidth: 820, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
+  boberstrike: { id: "boberstrike", name: "БобрСтрайк", color: "from-zinc-700 to-amber-900", defaultWidth: 860, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [

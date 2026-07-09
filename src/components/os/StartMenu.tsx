@@ -22,6 +22,8 @@ export function StartMenu({ onClose }: StartMenuProps) {
   const osVersion = useOS((s) => s.osVersion);
   const activated = useOS((s) => s.activated);
   const logoutUser = useOS((s) => s.logoutUser);
+  const language = useOS((s) => s.language);
+  const en = language === "en";
   const [q, setQ] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
 
@@ -53,13 +55,13 @@ export function StartMenu({ onClose }: StartMenuProps) {
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Поиск приложений..."
+          placeholder={en ? "Search apps..." : "Поиск приложений..."}
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-white/40"
         />
       </div>
 
       <div className="bober-scroll flex-1 overflow-y-auto p-4">
-        <p className="mb-2 text-[11px] uppercase tracking-wide text-white/40">Все приложения</p>
+        <p className="mb-2 text-[11px] uppercase tracking-wide text-white/40">{en ? "All apps" : "Все приложения"}</p>
         <div className="grid grid-cols-4 gap-1 sm:grid-cols-6">
           {filtered.map((appId) => (
             <button
@@ -75,7 +77,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
           ))}
           {filtered.length === 0 && (
             <p className="col-span-full py-8 text-center text-xs text-white/40">
-              Ничего не найдено. Бобёр в замешательстве.
+              {en ? "Nothing found. Beaver is confused." : "Ничего не найдено. Бобёр в замешательстве."}
             </p>
           )}
         </div>
@@ -90,7 +92,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
             <div>
               <p className="text-sm font-medium">{userName || "Бобёр"}</p>
               <p className="text-[10px] text-white/50">
-                {VERSION_LABEL[osVersion]} {!activated && "· не активирована"}
+                {VERSION_LABEL[osVersion]} {!activated && (en ? "· not activated" : "· не активирована")}
               </p>
             </div>
           </div>
@@ -98,7 +100,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
           <div className="flex items-center gap-1">
             <button
               onClick={handleSave}
-              title="Сохранить прогресс"
+              title={en ? "Save progress" : "Сохранить прогресс"}
               className={cn(
                 "relative grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10",
                 savedFlash ? "text-emerald-400" : hasUnsavedChanges() ? "text-amber-300" : "text-white/60"
@@ -111,14 +113,14 @@ export function StartMenu({ onClose }: StartMenuProps) {
             </button>
             <button
               onClick={handleLogout}
-              title="Сменить пользователя"
+              title={en ? "Switch user" : "Сменить пользователя"}
               className="grid h-8 w-8 place-items-center rounded-lg text-white/60 hover:bg-white/10"
             >
               <LogOut className="h-4 w-4" />
             </button>
             <button
               onClick={handlePower}
-              title="Выключение"
+              title={en ? "Power" : "Выключение"}
               className="grid h-8 w-8 place-items-center rounded-lg text-white/60 hover:bg-white/10"
             >
               <Power className="h-4 w-4" />

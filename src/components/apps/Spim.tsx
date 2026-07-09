@@ -42,6 +42,8 @@ const GAMES: GameItem[] = [
   { appId: "bober3d", price: 0, tagline: "3D-шутер! Исследуй лабиринт и стреляй барсуков.", rating: 4.9, genre: "3D / Шутер", size: "12 МБ", tag: "3D" },
   { appId: "parkour", price: 0, tagline: "Паркур: wall-jump, рывок, двойной прыжок!", rating: 4.8, genre: "Паркур", size: "8 МБ", tag: "NEW" },
   { appId: "rungun", price: 0, tagline: "Run-and-gun: волны барсуков и битва с боссом!", rating: 4.9, genre: "Шутер", size: "10 МБ", tag: "HIT" },
+  { appId: "voxelsandbox", price: 0, tagline: "3D-песочница! Строй и ломай блоки как в Майнкрафте.", rating: 5.0, genre: "3D / Песочница", size: "8 МБ", tag: "3D" },
+  { appId: "boberstrike", price: 0, tagline: "Мультиплеер 3D-FPS! Спецназ vs террористы по коду лобби.", rating: 5.0, genre: "3D / Мультиплеер", size: "12 МБ", tag: "MP" },
 ];
 
 const COMING_SOON_GAMES = [
@@ -205,6 +207,7 @@ function gameName(appId: AppId) {
     tetris: "Тетрис Бобра", pong: "Пинг-Понг Бобра", breakout: "Арканоид Бобра", sokoban: "Сокобан Бобра",
     fifteen: "Пятнашки", hangman: "Виселица", simon: "Симон",
     bober3d: "Бобр3D", parkour: "БоброПаркур", rungun: "Бобр: Штурм",
+    voxelsandbox: "БобрКрафт", boberstrike: "БобрСтрайк",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];
