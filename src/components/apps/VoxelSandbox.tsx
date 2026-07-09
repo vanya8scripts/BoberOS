@@ -172,15 +172,17 @@ export function VoxelSandbox() {
       );
 
       const colW = 2;
+      const halfW = w / 2;
+      const halfH = h / 2;
       for (let px = 0; px < w; px += colW) {
-        const camX = (px / w - 0.5) * 2 * fov;
+        const camX = (px - halfW) / halfW * fov;
         const dirX = -sinY * cosP - cosY * camX;
-        const dirY = sinP - 0;
+        const dirY = sinP + 0 * camX;
         const dirZ = -cosY * cosP + sinY * camX;
         const len = Math.hypot(dirX, dirY, dirZ) || 1;
         const dx = dirX / len, dy = dirY / len, dz = dirZ / len;
         const hit = castRay({ x: p.x, y: eyeY, z: p.z }, { x: dx, y: dy, z: dz }, 40);
-        const horizon = h / 2 + p.pitch * h * 0.3;
+        const horizon = halfH - sinP * halfH;
         if (hit) {
           const perp = hit.dist;
           const wallH = Math.min(h, h / perp);

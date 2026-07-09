@@ -66,6 +66,10 @@ export const APP_META: Record<AppId, AppMeta> = {
   rungun: { id: "rungun", name: "Бобр: Штурм", color: "from-red-600 to-amber-800", defaultWidth: 840, defaultHeight: 560, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
   voxelsandbox: { id: "voxelsandbox", name: "БобрКрафт", color: "from-emerald-600 to-green-900", defaultWidth: 820, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
   boberstrike: { id: "boberstrike", name: "БобрСтрайк", color: "from-zinc-700 to-amber-900", defaultWidth: 860, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
+  boberkart: { id: "boberkart", name: "БоброКарт", color: "from-rose-500 to-red-700", defaultWidth: 720, defaultHeight: 560, minWidth: 480, minHeight: 400, source: "spim", resizable: true },
+  tankbattle: { id: "tankbattle", name: "Танчики Бобра", color: "from-amber-600 to-yellow-800", defaultWidth: 640, defaultHeight: 600, minWidth: 440, minHeight: 440, source: "spim", resizable: true },
+  galtaxis: { id: "galtaxis", name: "Галактика Бобра", color: "from-indigo-600 to-purple-900", defaultWidth: 480, defaultHeight: 680, minWidth: 380, minHeight: 560, source: "spim", resizable: true },
+  bplatformer: { id: "bplatformer", name: "Приключения Бобра", color: "from-green-500 to-emerald-800", defaultWidth: 820, defaultHeight: 540, minWidth: 560, minHeight: 400, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [

@@ -53,7 +53,11 @@ export type AppId =
   | "parkour"
   | "rungun"
   | "voxelsandbox"
-  | "boberstrike";
+  | "boberstrike"
+  | "boberkart"
+  | "tankbattle"
+  | "galtaxis"
+  | "bplatformer";
 
 export type Language = "ru" | "en";
 

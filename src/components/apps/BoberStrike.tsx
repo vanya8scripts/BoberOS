@@ -7,7 +7,7 @@ import {
   Timer, Swords, LogIn, Plus, X, Trophy,
 } from "lucide-react";
 
-type Phase = "menu" | "playing" | "roundend" | "gameover";
+type Phase = "menu" | "lobby" | "playing" | "roundend" | "gameover";
 type Team = "spec" | "terror";
 type RoundState = "buy" | "live" | "end";
 type MapTheme = "concrete" | "sand" | "wood";
@@ -381,6 +381,7 @@ export function BoberStrike() {
 
   const [phase, setPhase] = useState<Phase>("menu");
   const phaseRef = useRef<Phase>("menu");
+  const [lobbyPlayers, setLobbyPlayers] = useState<{ id: string; name: string; team: Team }[]>([]);
   const [name, setName] = useState("Бобр" + Math.floor(Math.random() * 900 + 100));
   const [team, setTeam] = useState<Team>("spec");
   const [mapId, setMapId] = useState<string>("plant");
@@ -797,6 +798,10 @@ export function BoberStrike() {
         existing.team = msg.team;
         existing.lastSeenAt = Date.now();
       }
+      setLobbyPlayers((prev) => {
+        if (prev.some((p) => p.id === msg.id)) return prev;
+        return [...prev, { id: msg.id, name: msg.name, team: msg.team }];
+      });
       if (mapIdRef.current !== msg.map && msg.id < localIdRef.current) {
         mapIdRef.current = msg.map;
         setMapId(msg.map);
@@ -813,6 +818,7 @@ export function BoberStrike() {
     }
     if (msg.t === "bye") {
       playersRef.current.delete(msg.id);
+      setLobbyPlayers((prev) => prev.filter((p) => p.id !== msg.id));
       return;
     }
     if (msg.t === "state") {
@@ -1733,14 +1739,31 @@ export function BoberStrike() {
 
   const createLobby = useCallback(() => {
     const code = genLobbyCode();
-    joinGame(code);
-  }, [joinGame]);
+    nameRef.current = name.trim() || "Бобр" + Math.floor(Math.random() * 900 + 100);
+    teamRef.current = team;
+    mapIdRef.current = mapId;
+    setupChannel(code);
+    setLobbyCode(code);
+    setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, team }]);
+    setPhaseSync("lobby");
+  }, [name, team, mapId, setupChannel, setPhaseSync]);
 
   const joinExisting = useCallback(() => {
     const code = lobbyInput.trim().toUpperCase();
     if (code.length !== 6) return;
-    joinGame(code);
-  }, [lobbyInput, joinGame]);
+    nameRef.current = name.trim() || "Бобр" + Math.floor(Math.random() * 900 + 100);
+    teamRef.current = team;
+    mapIdRef.current = mapId;
+    setupChannel(code);
+    setLobbyCode(code);
+    setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, team }]);
+    sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team, lobby: code, map: mapId });
+    setPhaseSync("lobby");
+  }, [lobbyInput, name, team, mapId, setupChannel, sendNet, setPhaseSync]);
+
+  const startFromLobby = useCallback(() => {
+    joinGame(lobbyRef.current);
+  }, [joinGame]);
 
   const playSolo = useCallback(() => {
     const code = genLobbyCode();
@@ -1864,6 +1887,63 @@ export function BoberStrike() {
             <div className="px-2 py-1.5 rounded bg-black/40 border border-amber-900/40 text-center"><b className="text-amber-300">1/2</b> слоты</div>
             <div className="px-2 py-1.5 rounded bg-black/40 border border-amber-900/40 text-center"><b className="text-amber-300">Tab</b> таблица</div>
             <div className="px-2 py-1.5 rounded bg-black/40 border border-amber-900/40 text-center"><b className="text-amber-300">Esc</b> меню</div>
+          </div>
+        </div>
+      )}
+
+      {phase === "lobby" && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 text-white">
+          <div className="w-full max-w-md rounded-2xl border border-amber-700/40 bg-zinc-900/80 p-6 shadow-2xl">
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-widest text-amber-400/70">Код лобби</p>
+              <p className="mt-1 text-4xl font-black tracking-[0.4em] text-amber-300" style={{ textShadow: "0 0 20px rgba(251,191,36,0.4)" }}>{lobbyCode}</p>
+              <button
+                onClick={() => { navigator.clipboard?.writeText(lobbyCode); }}
+                className="mt-2 text-xs text-amber-300/60 hover:text-amber-200"
+              >
+                скопировать код
+              </button>
+              <p className="mt-3 text-xs text-zinc-400">
+                Открой сайт в новой вкладке и введи этот код, чтобы присоединиться.
+                Или нажми «Начать» для игры с ботами.
+              </p>
+            </div>
+
+            <div className="mt-5">
+              <p className="mb-2 text-[11px] uppercase tracking-wide text-zinc-500">Игроки в лобби ({lobbyPlayers.length})</p>
+              <div className="space-y-1.5">
+                {lobbyPlayers.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2 rounded-lg bg-white/5 p-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${p.team === "spec" ? "bg-sky-400" : "bg-rose-400"}`} />
+                    <span className="flex-1 text-sm">{p.name}{p.id === localIdRef.current && " (ты)"}</span>
+                    <span className={`text-[10px] ${p.team === "spec" ? "text-sky-400" : "text-rose-400"}`}>
+                      {p.team === "spec" ? "Спецназ" : "Террористы"}
+                    </span>
+                  </div>
+                ))}
+                {lobbyPlayers.length < 2 && (
+                  <div className="flex items-center gap-2 rounded-lg border border-dashed border-white/15 p-2 text-xs text-zinc-500">
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-zinc-600" />
+                    Ожидание игроков...
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={startFromLobby}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-zinc-900 hover:bg-amber-400"
+              >
+                <Swords className="h-4 w-4" /> Начать игру
+              </button>
+              <button
+                onClick={leaveGame}
+                className="rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white/70 hover:bg-white/20"
+              >
+                Выйти
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -44,15 +44,19 @@ const GAMES: GameItem[] = [
   { appId: "rungun", price: 0, tagline: "Run-and-gun: волны барсуков и битва с боссом!", rating: 4.9, genre: "Шутер", size: "10 МБ", tag: "HIT" },
   { appId: "voxelsandbox", price: 0, tagline: "3D-песочница! Строй и ломай блоки как в Майнкрафте.", rating: 5.0, genre: "3D / Песочница", size: "8 МБ", tag: "3D" },
   { appId: "boberstrike", price: 0, tagline: "Мультиплеер 3D-FPS! Спецназ vs террористы по коду лобби.", rating: 5.0, genre: "3D / Мультиплеер", size: "12 МБ", tag: "MP" },
+  { appId: "boberkart", price: 0, tagline: "Гонки на картах! 3 круга, ИИ-соперники, заносы.", rating: 4.7, genre: "Гонки", size: "7 МБ", tag: "NEW" },
+  { appId: "tankbattle", price: 0, tagline: "Танчики в стиле Battle City. Защити плотину!", rating: 4.8, genre: "Аркада", size: "6 МБ", tag: "NEW" },
+  { appId: "galtaxis", price: 0, tagline: "Космический шутер! Волны пришельцев и боссы.", rating: 4.6, genre: "Шутер", size: "5 МБ", tag: "NEW" },
+  { appId: "bplatformer", price: 0, tagline: "Платформер как Mario. Прыгай на барсуков, собирай монеты.", rating: 4.7, genre: "Платформер", size: "8 МБ", tag: "NEW" },
 ];
 
 const COMING_SOON_GAMES = [
-  { name: "Майнкрафт Бобра", genre: "Песочница", emoji: "⛏️" },
-  { name: "БоброКарт", genre: "Гонки", emoji: "🏎️" },
-  { name: "Among Beavers", genre: "Мультиплеер", emoji: "🤫" },
   { name: "Бобр: RPG", genre: "RPG", emoji: "⚔️" },
-  { name: "Танчики Бобра", genre: "Аркада", emoji: "tank" },
+  { name: "Among Beavers", genre: "Мультиплеер", emoji: "🤫" },
   { name: "Шахматы Бобра", genre: "Логика", emoji: "♟️" },
+  { name: "Бобр-Тетрис 2", genre: "Головоломка", emoji: "🧩" },
+  { name: "Бобр: Выживание", genre: "Survival", emoji: "🏕️" },
+  { name: "Бобр-Стратегия", genre: "Стратегия", emoji: "🏰" },
 ];
 
 export function Spim() {
@@ -208,6 +212,7 @@ function gameName(appId: AppId) {
     fifteen: "Пятнашки", hangman: "Виселица", simon: "Симон",
     bober3d: "Бобр3D", parkour: "БоброПаркур", rungun: "Бобр: Штурм",
     voxelsandbox: "БобрКрафт", boberstrike: "БобрСтрайк",
+    boberkart: "БоброКарт", tankbattle: "Танчики Бобра", galtaxis: "Галактика Бобра", bplatformer: "Приключения Бобра",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];

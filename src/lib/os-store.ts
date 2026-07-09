@@ -322,7 +322,7 @@ export const useOS = create<OSState>()(
           height,
           zIndex: z,
           minimized: false,
-          maximized: isMobile,
+          maximized: false,
         };
         set({ windows: [...state.windows, win], zCounter: z });
       },

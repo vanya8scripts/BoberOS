@@ -31,6 +31,7 @@ const ICONS: Record<AppId, LucideIcon> = {
   gallery: ImageIcon, taskmanager: Activity,
   bober3d: Blocks, parkour: Activity, rungun: Crosshair,
   voxelsandbox: Blocks, boberstrike: Crosshair,
+  boberkart: Gamepad2, tankbattle: Crosshair, galtaxis: Gamepad2, bplatformer: Activity,
 };
 
 interface AppIconProps {

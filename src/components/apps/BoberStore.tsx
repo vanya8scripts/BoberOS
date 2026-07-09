@@ -35,7 +35,6 @@ const STORE_APPS: StoreApp[] = [
 ];
 
 const COMING_SOON_APPS = [
-  { name: "BoberGames", category: "Игры", emoji: "🎮" },
   { name: "BoberBank", category: "Финансы", emoji: "🏦" },
   { name: "BoberShop", category: "Покупки", emoji: "🛍️" },
   { name: "BoberTaxi", category: "Транспорт", emoji: "🚕" },
@@ -43,6 +42,11 @@ const COMING_SOON_APPS = [
   { name: "BoberFit", category: "Спорт", emoji: "💪" },
   { name: "BoberPay", category: "Финансы", emoji: "💳" },
   { name: "BoberSocial", category: "Сети", emoji: "💬" },
+  { name: "BoberRadio", category: "Музыка", emoji: "📻" },
+  { name: "BoberPaint3D", category: "Графика", emoji: "🎨" },
+  { name: "BoberQuiz", category: "Викторины", emoji: "❓" },
+  { name: "BoberRacing", category: "Гонки", emoji: "🏁" },
+  { name: "BoberChess", category: "Логика", emoji: "♟️" },
 ];
 
 export function BoberStore() {
