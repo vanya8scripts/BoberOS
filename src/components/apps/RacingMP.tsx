@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createHostChannel, createGuestChannel } from "@/lib/mp";
 import {
   Flag, LogOut, Plus, LogIn, Bot, RefreshCw, Trophy,
   Timer, Wifi, Copy, Check, Users, Gauge,
@@ -651,7 +652,7 @@ export function RacingMP() {
   const racersRef = useRef<Map<string, Racer>>(new Map());
   const particlesRef = useRef<Particle[]>([]);
   const keysRef = useRef<Set<string>>(new Set());
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const channelRef = useRef<{ postMessage: (m: unknown) => void; close: () => void; ready: boolean; onmessage: ((e: { data: unknown }) => void) | null; onready: (() => void) | null; onerror: ((e: string) => void) | null; onpeerjoin: ((id: string) => void) | null; onpeerleave: ((id: string) => void) | null; isHost: boolean } | null>(null);
   const lastTimeRef = useRef(0);
   const lastStateSentRef = useRef(0);
   const raceStartAtRef = useRef(0);
@@ -818,7 +819,7 @@ export function RacingMP() {
     }
   }, [beginRace, determineHost, sendNet, setPhaseSync]);
 
-  const setupChannel = useCallback((code: string) => {
+  const setupChannel = useCallback((code: string, isHost: boolean) => {
     if (channelRef.current) {
       try {
         channelRef.current.postMessage({ t: "bye", id: localIdRef.current, lobby: lobbyRef.current } as NetMsg);
@@ -829,14 +830,15 @@ export function RacingMP() {
     knownHostRef.current = "";
     lastHostMsgAtRef.current = 0;
     joinedAtRef.current = Date.now();
-    if (typeof BroadcastChannel === "undefined") {
-      channelRef.current = null;
-      return;
-    }
-    const ch = new BroadcastChannel(`bober-racing-mp-${code}`);
+    const ch = isHost ? createHostChannel(code) : createGuestChannel(code);
     channelRef.current = ch;
-    ch.onmessage = (ev: MessageEvent<NetMsg>) => handleNet(ev.data);
-    sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code });
+    ch.onmessage = (ev: { data: unknown }) => handleNet(ev.data as NetMsg);
+    ch.onready = () => {
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code });
+    };
+    ch.onpeerjoin = () => { void 0; };
+    ch.onpeerleave = (id: string) => { racersRef.current.delete(id); };
+    ch.onerror = () => { void 0; };
   }, [handleNet, sendNet]);
 
   const createLobby = useCallback(() => {
@@ -845,7 +847,7 @@ export function RacingMP() {
     racersRef.current.clear();
     const local = newRacer(localIdRef.current, nameRef.current, colorRef.current, true, false);
     racersRef.current.set(localIdRef.current, local);
-    setupChannel(code);
+    setupChannel(code, true);
     setLobbyCode(code);
     setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, color: colorRef.current, isLocal: true }]);
     setCopied(false);
@@ -859,7 +861,7 @@ export function RacingMP() {
     racersRef.current.clear();
     const local = newRacer(localIdRef.current, nameRef.current, colorRef.current, true, false);
     racersRef.current.set(localIdRef.current, local);
-    setupChannel(code);
+    setupChannel(code, false);
     setLobbyCode(code);
     setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, color: colorRef.current, isLocal: true }]);
     setPhaseSync("lobby");
@@ -912,7 +914,7 @@ export function RacingMP() {
     racersRef.current.clear();
     const local = newRacer(localIdRef.current, nameRef.current, colorRef.current, true, false);
     racersRef.current.set(localIdRef.current, local);
-    setupChannel(code);
+    setupChannel(code, true);
     setLobbyCode(code);
     setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, color: colorRef.current, isLocal: true }]);
     window.setTimeout(() => startRace(), 120);

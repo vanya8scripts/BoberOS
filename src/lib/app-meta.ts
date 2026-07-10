@@ -72,6 +72,9 @@ export const APP_META: Record<AppId, AppMeta> = {
   bplatformer: { id: "bplatformer", name: "Приключения Бобра", color: "from-green-500 to-emerald-800", defaultWidth: 820, defaultHeight: 540, minWidth: 560, minHeight: 400, source: "spim", resizable: true },
   beaversaga: { id: "beaversaga", name: "Сага о Бобре", color: "from-amber-600 to-red-900", defaultWidth: 760, defaultHeight: 600, minWidth: 480, minHeight: 500, source: "spim", resizable: true },
   racingmp: { id: "racingmp", name: "БоброГонки MP", color: "from-rose-500 to-orange-700", defaultWidth: 800, defaultHeight: 580, minWidth: 520, minHeight: 420, source: "spim", resizable: true },
+  boberpiano: { id: "boberpiano", name: "BoberPiano", color: "from-fuchsia-500 to-purple-700", defaultWidth: 680, defaultHeight: 420, minWidth: 420, minHeight: 320, source: "store", resizable: true },
+  boberdice: { id: "boberdice", name: "BoberDice", color: "from-emerald-500 to-teal-700", defaultWidth: 480, defaultHeight: 560, minWidth: 360, minHeight: 440, source: "store", resizable: true },
+  boberspeedtest: { id: "boberspeedtest", name: "BoberSpeedtest", color: "from-green-500 to-emerald-700", defaultWidth: 560, defaultHeight: 520, minWidth: 400, minHeight: 400, source: "store", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [

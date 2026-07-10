@@ -59,7 +59,10 @@ export type AppId =
   | "galtaxis"
   | "bplatformer"
   | "beaversaga"
-  | "racingmp";
+  | "racingmp"
+  | "boberpiano"
+  | "boberdice"
+  | "boberspeedtest";
 
 export type Language = "ru" | "en";
 

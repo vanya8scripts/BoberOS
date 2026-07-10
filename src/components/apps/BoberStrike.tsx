@@ -6,6 +6,7 @@ import {
   LogOut, RefreshCw, ShoppingBag, Bot, Wifi,
   Timer, Swords, LogIn, Plus, X, Trophy,
 } from "lucide-react";
+import { createHostChannel, createGuestChannel } from "@/lib/mp";
 
 type Phase = "menu" | "lobby" | "playing" | "roundend" | "gameover";
 type Team = "spec" | "terror";
@@ -382,6 +383,7 @@ export function BoberStrike() {
   const [phase, setPhase] = useState<Phase>("menu");
   const phaseRef = useRef<Phase>("menu");
   const [lobbyPlayers, setLobbyPlayers] = useState<{ id: string; name: string; team: Team }[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [name, setName] = useState("Бобр" + Math.floor(Math.random() * 900 + 100));
   const [team, setTeam] = useState<Team>("spec");
   const [mapId, setMapId] = useState<string>("plant");
@@ -404,7 +406,7 @@ export function BoberStrike() {
   const teamRef = useRef<Team>(team);
   const mapIdRef = useRef<string>(mapId);
   const lobbyRef = useRef<string>("");
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const channelRef = useRef<{ postMessage: (m: unknown) => void; close: () => void; ready: boolean; onmessage: ((e: { data: unknown }) => void) | null; onready: (() => void) | null; onerror: ((e: string) => void) | null; onpeerjoin: ((id: string) => void) | null; onpeerleave: ((id: string) => void) | null; isHost: boolean } | null>(null);
 
   const playersRef = useRef<Map<string, PlayerState>>(new Map());
   const botsRef = useRef<PlayerState[]>([]);
@@ -912,7 +914,7 @@ export function BoberStrike() {
     }
   }, [applyDamage, determineHost, pushKillFeed, respawnPlayer, sendNet, setPhaseSync]);
 
-  const setupChannel = useCallback((code: string) => {
+  const setupChannel = useCallback((code: string, isHost: boolean) => {
     if (channelRef.current) {
       try {
         channelRef.current.postMessage({ t: "bye", id: localIdRef.current, lobby: lobbyRef.current } as NetMsg);
@@ -923,14 +925,30 @@ export function BoberStrike() {
     knownHostRef.current = "";
     lastRoundMsgAtRef.current = 0;
     joinedAtRef.current = Date.now();
-    if (typeof BroadcastChannel === "undefined") {
-      channelRef.current = null;
-      return;
-    }
-    const ch = new BroadcastChannel(`boberstrike-${code}`);
+    const ch = isHost
+      ? createHostChannel(code)
+      : createGuestChannel(code);
     channelRef.current = ch;
-    ch.onmessage = (ev: MessageEvent<NetMsg>) => handleNet(ev.data);
-    sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+    ch.onmessage = (ev: { data: unknown }) => handleNet(ev.data as NetMsg);
+    ch.onpeerjoin = (id: string) => {
+      setLobbyPlayers((prev) => {
+        if (prev.some((p) => p.id === id)) return prev;
+        return [...prev, { id, name: "Игрок", team: "spec" as Team }];
+      });
+    };
+    ch.onpeerleave = (id: string) => {
+      playersRef.current.delete(id);
+      setLobbyPlayers((prev) => prev.filter((p) => p.id !== id));
+    };
+    ch.onready = () => {
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+    };
+    ch.onerror = (err: string) => {
+      if (!isHost) {
+        setErrorMsg("Не удалось подключиться. Проверь код лобби.");
+        setTimeout(() => setErrorMsg(null), 4000);
+      }
+    };
   }, [handleNet, sendNet]);
 
   const joinGame = useCallback((code: string) => {
@@ -957,7 +975,7 @@ export function BoberStrike() {
     winnerRef.current = null;
     lastRoundNumAppliedRef.current = 1;
     botsRef.current = [];
-    setupChannel(code);
+    if (!channelRef.current) setupChannel(code, true);
     setLobbyCode(code);
     setPhaseSync("playing");
     setPaused(false);
@@ -1742,7 +1760,7 @@ export function BoberStrike() {
     nameRef.current = name.trim() || "Бобр" + Math.floor(Math.random() * 900 + 100);
     teamRef.current = team;
     mapIdRef.current = mapId;
-    setupChannel(code);
+    setupChannel(code, true);
     setLobbyCode(code);
     setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, team }]);
     setPhaseSync("lobby");
@@ -1754,10 +1772,9 @@ export function BoberStrike() {
     nameRef.current = name.trim() || "Бобр" + Math.floor(Math.random() * 900 + 100);
     teamRef.current = team;
     mapIdRef.current = mapId;
-    setupChannel(code);
+    setupChannel(code, false);
     setLobbyCode(code);
     setLobbyPlayers([{ id: localIdRef.current, name: nameRef.current, team }]);
-    sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team, lobby: code, map: mapId });
     setPhaseSync("lobby");
   }, [lobbyInput, name, team, mapId, setupChannel, sendNet, setPhaseSync]);
 
@@ -1911,6 +1928,9 @@ export function BoberStrike() {
 
             <div className="mt-5">
               <p className="mb-2 text-[11px] uppercase tracking-wide text-zinc-500">Игроки в лобби ({lobbyPlayers.length})</p>
+              {errorMsg && (
+                <div className="mb-2 rounded-lg bg-rose-500/20 px-3 py-2 text-xs text-rose-300">{errorMsg}</div>
+              )}
               <div className="space-y-1.5">
                 {lobbyPlayers.map((p) => (
                   <div key={p.id} className="flex items-center gap-2 rounded-lg bg-white/5 p-2">

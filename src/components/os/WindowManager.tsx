@@ -41,6 +41,9 @@ import { BoberShooter } from "@/components/apps/BoberShooter";
 import { BoberPlatformer } from "@/components/apps/BoberPlatformer";
 import { BeaverSaga } from "@/components/apps/BeaverSaga";
 import { RacingMP } from "@/components/apps/RacingMP";
+import { BoberPiano } from "@/components/apps/BoberPiano";
+import { BoberDice } from "@/components/apps/BoberDice";
+import { BoberSpeedtest } from "@/components/apps/BoberSpeedtest";
 import { MyBober } from "@/components/apps/MyBober";
 import { Notepad } from "@/components/apps/Notepad";
 import { Settings } from "@/components/apps/Settings";
@@ -78,6 +81,7 @@ const APP_COMPONENTS: Record<AppId, React.ComponentType> = {
   voxelsandbox: VoxelSandbox, boberstrike: BoberStrike,
   boberkart: BoberKart, tankbattle: TankBattle, galtaxis: BoberShooter, bplatformer: BoberPlatformer,
   beaversaga: BeaverSaga, racingmp: RacingMP,
+  boberpiano: BoberPiano, boberdice: BoberDice, boberspeedtest: BoberSpeedtest,
   mybober: MyBober, notepad: Notepad, settings: Settings, calculator: Calculator,
   boberchat: BoberChat, boberbrowser: BoberBrowser, boberterminal: BoberTerminal,
   boberclock: BoberClock, bobertunes: BoberTunes, registryeditor: RegistryEditor,

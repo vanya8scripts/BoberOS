@@ -39,15 +39,15 @@ const GAMES: GameItem[] = [
   { appId: "sudoku", price: 0, tagline: "Судоку 9x9. 3 уровня сложности, заметки.", rating: 4.6, genre: "Головоломка", size: "4 МБ", tag: "NEW" },
   { appId: "connect4", price: 0, tagline: "Четыре в ряд против бобра. Стратегия решает!", rating: 4.5, genre: "Логика", size: "4 МБ", tag: "NEW" },
   { appId: "wordle", price: 0, tagline: "Угадай бобро-слово за 6 попыток. Wordle!", rating: 4.7, genre: "Слова", size: "3 МБ", tag: "NEW" },
-  { appId: "bober3d", price: 0, tagline: "3D-шутер! Исследуй лабиринт и стреляй барсуков.", rating: 4.9, genre: "3D / Шутер", size: "12 МБ", tag: "3D" },
-  { appId: "parkour", price: 0, tagline: "Паркур: wall-jump, рывок, двойной прыжок!", rating: 4.8, genre: "Паркур", size: "8 МБ", tag: "NEW" },
-  { appId: "rungun", price: 0, tagline: "Run-and-gun: волны барсуков и битва с боссом!", rating: 4.9, genre: "Шутер", size: "10 МБ", tag: "HIT" },
-  { appId: "voxelsandbox", price: 0, tagline: "3D-песочница! Строй и ломай блоки как в Майнкрафте.", rating: 5.0, genre: "3D / Песочница", size: "8 МБ", tag: "3D" },
+  { appId: "bober3d", price: 800, tagline: "3D-шутер! Исследуй лабиринт и стреляй барсуков.", rating: 4.9, genre: "3D / Шутер", size: "12 МБ", tag: "3D" },
+  { appId: "parkour", price: 500, tagline: "Паркур: wall-jump, рывок, двойной прыжок!", rating: 4.8, genre: "Паркур", size: "8 МБ", tag: "NEW" },
+  { appId: "rungun", price: 700, tagline: "Run-and-gun: волны барсуков и битва с боссом!", rating: 4.9, genre: "Шутер", size: "10 МБ", tag: "HIT" },
+  { appId: "voxelsandbox", price: 1200, tagline: "3D-песочница! Строй и ломай блоки как в Майнкрафте.", rating: 5.0, genre: "3D / Песочница", size: "8 МБ", tag: "3D" },
   { appId: "boberstrike", price: 0, tagline: "Мультиплеер 3D-FPS! Спецназ vs террористы по коду лобби.", rating: 5.0, genre: "3D / Мультиплеер", size: "12 МБ", tag: "MP" },
-  { appId: "boberkart", price: 0, tagline: "Гонки на картах! 3 круга, ИИ-соперники, заносы.", rating: 4.7, genre: "Гонки", size: "7 МБ", tag: "NEW" },
-  { appId: "tankbattle", price: 0, tagline: "Танчики в стиле Battle City. Защити плотину!", rating: 4.8, genre: "Аркада", size: "6 МБ", tag: "NEW" },
-  { appId: "galtaxis", price: 0, tagline: "Космический шутер! Волны пришельцев и боссы.", rating: 4.6, genre: "Шутер", size: "5 МБ", tag: "NEW" },
-  { appId: "bplatformer", price: 0, tagline: "Платформер как Mario. Прыгай на барсуков, собирай монеты.", rating: 4.7, genre: "Платформер", size: "8 МБ", tag: "NEW" },
+  { appId: "boberkart", price: 400, tagline: "Гонки на картах! 3 круга, ИИ-соперники, заносы.", rating: 4.7, genre: "Гонки", size: "7 МБ", tag: "NEW" },
+  { appId: "tankbattle", price: 450, tagline: "Танчики в стиле Battle City. Защити плотину!", rating: 4.8, genre: "Аркада", size: "6 МБ", tag: "NEW" },
+  { appId: "galtaxis", price: 350, tagline: "Космический шутер! Волны пришельцев и боссы.", rating: 4.6, genre: "Шутер", size: "5 МБ", tag: "NEW" },
+  { appId: "bplatformer", price: 550, tagline: "Платформер как Mario. Прыгай на барсуков, собирай монеты.", rating: 4.7, genre: "Платформер", size: "8 МБ", tag: "NEW" },
   { appId: "beaversaga", price: 600, tagline: "Сюжетная RPG-сага! Путешествие за Золотой Веткой. 3 концовки.", rating: 4.9, genre: "RPG / Сюжет", size: "6 МБ", tag: "HIT" },
   { appId: "racingmp", price: 0, tagline: "Мультиплеер гонки! Создай лобби, позови друга по коду.", rating: 4.8, genre: "Гонки / Мультиплеер", size: "7 МБ", tag: "MP" },
 ];
@@ -142,7 +142,7 @@ export function Spim() {
             const installed = installedApps.includes(game.appId);
             const pct = progress[game.appId];
             const isInstalling = pct !== undefined;
-            const owned = game.appId === "cyberbober" ? cyberboberOwned : game.price === 0;
+            const owned = game.price === 0 || installedApps.includes(game.appId) || (game.appId === "cyberbober" && cyberboberOwned);
             return (
               <div key={game.appId} className="flex gap-3 rounded-2xl border border-white/10 bg-zinc-900 p-3">
                 <div className="relative shrink-0">

@@ -6,7 +6,7 @@ import {
   Bird, ChevronsLeftRight, Crosshair, Gamepad2, Grid3x3, Bomb, Brain, Hand, Hash, Hammer,
   Mail, CloudSun, Map, Youtube, FileEdit, Shield, Cloud, Languages, Activity,
   CalendarDays, Code2, FolderTree, Blocks, LetterText, Radio, Image as ImageIcon,
-  BookOpen,
+  BookOpen, Gauge,
   type LucideIcon,
 } from "lucide-react";
 import type { AppId } from "@/lib/os-types";
@@ -34,6 +34,7 @@ const ICONS: Record<AppId, LucideIcon> = {
   voxelsandbox: Blocks, boberstrike: Crosshair,
   boberkart: Gamepad2, tankbattle: Crosshair, galtaxis: Gamepad2, bplatformer: Activity,
   beaversaga: BookOpen, racingmp: Gamepad2,
+  boberpiano: Music, boberdice: Activity, boberspeedtest: Gauge,
 };
 
 interface AppIconProps {

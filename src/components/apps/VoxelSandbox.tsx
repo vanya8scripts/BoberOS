@@ -86,8 +86,18 @@ export function VoxelSandbox() {
   const stR = useRef(state);
   const selR = useRef(sel);
   const world = useRef<Map<string, B>>(genWorld());
-  const pR = useRef<P>({ x: WS / 2, y: 8, z: WD / 2, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, onGround: false, flying: false });
+  const pR = useRef<P>({ x: WS / 2, y: 6, z: WD / 2, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, onGround: false, flying: false });
   const keys = useRef<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const w = world.current;
+    const sx = Math.floor(WS / 2), sz = Math.floor(WD / 2);
+    let groundY = 1;
+    for (let y = WH; y >= 0; y--) {
+      if (w.has(keyc(sx, y, sz))) { groundY = y + 1; break; }
+    }
+    pR.current.y = groundY + 0.5;
+  }, []);
 
   useEffect(() => { stR.current = state; }, [state]);
   useEffect(() => { selR.current = sel; }, [sel]);

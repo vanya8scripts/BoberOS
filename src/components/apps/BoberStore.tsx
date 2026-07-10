@@ -18,7 +18,7 @@ interface StoreApp {
 
 const STORE_APPS: StoreApp[] = [
   { appId: "antivirus360", tagline: "Защита от бобро-вирусов и злых барсуков", rating: 4.6, downloads: "12 млн", category: "Безопасность", badge: "ТОП" },
-  { appId: "spim", tagline: "Магазин игр: 17 игр от Флэппи до Тетриса", rating: 4.8, downloads: "48 млн", category: "Игры", badge: "ХИТ" },
+  { appId: "spim", tagline: "Магазин игр: 30+ игр от Флэппи до 3D-шутеров", rating: 4.8, downloads: "48 млн", category: "Игры", badge: "ХИТ" },
   { appId: "bobercoin", tagline: "Майним монеты кликами. 1 клик = 100 BBC", rating: 4.9, downloads: "99 млн", category: "Финансы", badge: "🤑" },
   { appId: "bobermail", tagline: "Почта для грызунов с фейковой папкой входящих", rating: 4.5, downloads: "8 млн", category: "Связь" },
   { appId: "boberweather", tagline: "Прогноз погоды: дождь, снег, ветки с неба", rating: 4.3, downloads: "15 млн", category: "Утилиты" },
@@ -32,6 +32,9 @@ const STORE_APPS: StoreApp[] = [
   { appId: "bobermonitor", tagline: "Мониторинг CPU/RAM плотины в реальном времени", rating: 4.5, downloads: "5 млн", category: "Система", badge: "NEW" },
   { appId: "bobercalendar", tagline: "Календарь с бобро-праздниками", rating: 4.2, downloads: "7 млн", category: "Офис" },
   { appId: "boberstudio", tagline: "Редактор кода с подсветкой и запуском JS", rating: 4.8, downloads: "4 млн", category: "Разработка", badge: "NEW" },
+  { appId: "boberpiano", tagline: "Пианино! Играй на клавишах, записывай мелодии", rating: 4.7, downloads: "9 млн", category: "Музыка", badge: "NEW" },
+  { appId: "boberdice", tagline: "Генератор костей D4-D100. Для настолок", rating: 4.4, downloads: "3 млн", category: "Утилиты" },
+  { appId: "boberspeedtest", tagline: "Проверь скорость BoberNet 5G", rating: 4.5, downloads: "6 млн", category: "Утилиты", badge: "NEW" },
 ];
 
 const COMING_SOON_APPS = [
@@ -185,6 +188,7 @@ function appName(appId: AppId) {
     bobermail: "BoberMail", boberweather: "BoberWeather", bobermaps: "BoberMaps", bobertube: "BoberTube",
     boberoffice: "BoberOffice", bobercalcpro: "BoberCalc Pro", bobervpn: "BoberVPN", bobercloud: "BoberCloud",
     bobertranslate: "BoberTranslate", bobermonitor: "BoberMonitor", bobercalendar: "BoberCalendar", boberstudio: "BoberStudio",
+    boberpiano: "BoberPiano", boberdice: "BoberDice", boberspeedtest: "BoberSpeedtest",
     flappybober: "Флэппи Бобёр", cs2: "КС2", cyberbober: "КиберБобер",
     snake: "Змейка Бобра", game2048: "2048 Бобра", minesweeper: "Сапёр",
     memory: "Память", rps: "Камень-Ножницы-Бумага", tictactoe: "Крестики-нолики", whackamole: "Реакция Бобра",
