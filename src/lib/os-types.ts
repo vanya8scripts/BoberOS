@@ -64,7 +64,10 @@ export type AppId =
   | "boberdice"
   | "boberspeedtest"
   | "boberchess"
-  | "snake3d";
+  | "snake3d"
+  | "globalchat"
+  | "arena3d"
+  | "towerdefense";
 
 export type Language = "ru" | "en";
 

@@ -36,6 +36,7 @@ const ICONS: Record<AppId, LucideIcon> = {
   beaversaga: BookOpen, racingmp: Gamepad2,
   boberpiano: Music, boberdice: Activity, boberspeedtest: Gauge,
   boberchess: Grid3x3, snake3d: Gamepad2,
+  globalchat: MessageCircle, arena3d: Crosshair, towerdefense: Shield,
 };
 
 interface AppIconProps {

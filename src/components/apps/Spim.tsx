@@ -52,6 +52,8 @@ const GAMES: GameItem[] = [
   { appId: "racingmp", price: 0, tagline: "Мультиплеер гонки! Создай лобби, позови друга по коду.", rating: 4.8, genre: "Гонки / Мультиплеер", size: "7 МБ", tag: "MP" },
   { appId: "boberchess", price: 300, tagline: "Шахматы vs ИИ! Полные правила, рокировка, взятие на проходе.", rating: 4.7, genre: "Логика", size: "4 МБ", tag: "NEW" },
   { appId: "snake3d", price: 250, tagline: "Змейка в 3D-изометрии! Красивые кубы, растущая скорость.", rating: 4.6, genre: "Аркада", size: "3 МБ", tag: "3D" },
+  { appId: "arena3d", price: 900, tagline: "3D-арена! Волны врагов, power-ups, неоновый стиль.", rating: 4.9, genre: "3D / Шутер", size: "10 МБ", tag: "3D" },
+  { appId: "towerdefense", price: 650, tagline: "Защити плотину! Башни, волны барсуков, 10 уровней.", rating: 4.8, genre: "Стратегия", size: "7 МБ", tag: "HIT" },
 ];
 
 export function Spim() {
@@ -206,6 +208,7 @@ function gameName(appId: AppId) {
     boberkart: "БоброКарт", tankbattle: "Танчики Бобра", galtaxis: "Галактика Бобра", bplatformer: "Приключения Бобра",
     beaversaga: "Сага о Бобре", racingmp: "БоброГонки MP",
     boberchess: "Шахматы Бобра", snake3d: "Змейка 3D",
+    arena3d: "Бобр: Арена 3D", towerdefense: "Защита Плотины",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];

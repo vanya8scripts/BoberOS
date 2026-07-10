@@ -46,6 +46,9 @@ import { BoberDice } from "@/components/apps/BoberDice";
 import { BoberSpeedtest } from "@/components/apps/BoberSpeedtest";
 import { BoberChess } from "@/components/apps/BoberChess";
 import { Snake2 } from "@/components/apps/Snake2";
+import { GlobalChat } from "@/components/apps/GlobalChat";
+import Arena3D from "@/components/apps/Arena3D";
+import TowerDefense from "@/components/apps/TowerDefense";
 import { MyBober } from "@/components/apps/MyBober";
 import { Notepad } from "@/components/apps/Notepad";
 import { Settings } from "@/components/apps/Settings";
@@ -85,6 +88,7 @@ const APP_COMPONENTS: Record<AppId, React.ComponentType> = {
   beaversaga: BeaverSaga, racingmp: RacingMP,
   boberpiano: BoberPiano, boberdice: BoberDice, boberspeedtest: BoberSpeedtest,
   boberchess: BoberChess, snake3d: Snake2,
+  globalchat: GlobalChat, arena3d: Arena3D, towerdefense: TowerDefense,
   mybober: MyBober, notepad: Notepad, settings: Settings, calculator: Calculator,
   boberchat: BoberChat, boberbrowser: BoberBrowser, boberterminal: BoberTerminal,
   boberclock: BoberClock, bobertunes: BoberTunes, registryeditor: RegistryEditor,

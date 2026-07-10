@@ -406,6 +406,7 @@ export function BoberStrike() {
   const teamRef = useRef<Team>(team);
   const mapIdRef = useRef<string>(mapId);
   const lobbyRef = useRef<string>("");
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelRef = useRef<{ postMessage: (m: unknown) => void; close: () => void; ready: boolean; onmessage: ((e: { data: unknown }) => void) | null; onready: (() => void) | null; onerror: ((e: string) => void) | null; onpeerjoin: ((id: string) => void) | null; onpeerleave: ((id: string) => void) | null; isHost: boolean } | null>(null);
 
   const playersRef = useRef<Map<string, PlayerState>>(new Map());
@@ -939,14 +940,19 @@ export function BoberStrike() {
     };
     ch.onready = () => {
       sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      heartbeatRef.current = setInterval(() => {
+        sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+      }, 2000);
     };
     ch.onerror = (err: string) => {
       if (!isHost) {
-        setErrorMsg("Не удалось подключиться. Проверь код лобби.");
-        setTimeout(() => setErrorMsg(null), 4000);
+        setErrorMsg(err.includes("не найдено") || err.includes("not found") ? "Лобби не найдено. Проверь код." : "Ошибка подключения: " + err);
+        setTimeout(() => setErrorMsg(null), 5000);
+        setPhaseSync("menu");
       }
     };
-  }, [handleNet, sendNet]);
+  }, [handleNet, sendNet, setPhaseSync]);
 
   const joinGame = useCallback((code: string) => {
     nameRef.current = name.trim() || "Бобр" + Math.floor(Math.random() * 900 + 100);
@@ -985,6 +991,7 @@ export function BoberStrike() {
   }, [name, team, mapId, setupChannel, setPhaseSync]);
 
   const leaveGame = useCallback(() => {
+    if (heartbeatRef.current) { clearInterval(heartbeatRef.current); heartbeatRef.current = null; }
     sendNet({ t: "bye", id: localIdRef.current, lobby: lobbyRef.current });
     if (channelRef.current) {
       try { channelRef.current.close(); } catch { void 0; }
@@ -993,7 +1000,9 @@ export function BoberStrike() {
     if (document.pointerLockElement) document.exitPointerLock();
     playersRef.current.clear();
     botsRef.current = [];
+    setLobbyPlayers([]);
     setLobbyCode("");
+    setErrorMsg(null);
     setPaused(false);
     setBuyOpen(false);
     setScoreboardOpen(false);

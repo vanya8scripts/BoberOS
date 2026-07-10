@@ -2,7 +2,7 @@
 
 import Peer, { DataConnection } from "peerjs";
 
-const PREFIX = "boberos-mp-";
+const PREFIX = "boberos-v2-";
 
 export interface UnifiedChannel {
   postMessage: (msg: unknown) => void;
@@ -26,18 +26,11 @@ export function createHostChannel(code: string): UnifiedChannel {
     ]},
   });
   const conns = new Map<string, DataConnection>();
-  let isReady = false;
 
   const ch: UnifiedChannel = {
-    isHost: true,
-    ready: false,
-    onmessage: null,
-    onpeerjoin: null,
-    onpeerleave: null,
-    onready: null,
-    onerror: null,
+    isHost: true, ready: false,
+    onmessage: null, onpeerjoin: null, onpeerleave: null, onready: null, onerror: null,
     postMessage: (msg) => {
-      if (ch.onmessage) ch.onmessage({ data: msg });
       conns.forEach((c) => { if (c.open) { try { c.send(msg); } catch { void 0; } } });
     },
     close: () => {
@@ -47,11 +40,15 @@ export function createHostChannel(code: string): UnifiedChannel {
   };
 
   peer.on("open", () => {
-    isReady = true;
     (ch as { ready: boolean }).ready = true;
     ch.onready?.();
   });
-  peer.on("error", (err) => ch.onerror?.(err.message || String(err)));
+  peer.on("error", (err) => {
+    const msg = (err as Error).message || String(err);
+    if (msg.includes("unavailable") || msg.includes("taken")) {
+      ch.onerror?.("ID занят. Попробуй другой код.");
+    }
+  });
 
   peer.on("connection", (conn) => {
     conn.on("open", () => {
@@ -76,23 +73,21 @@ export function createGuestChannel(code: string): UnifiedChannel {
     config: { iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
       { urls: "stun:stun1.l.google.com:19302" },
-      { urls: "stun:stun2.l.google.com:19302" },
     ]},
   });
   let conn: DataConnection | null = null;
+  let connectTimeout: ReturnType<typeof setTimeout> | null = null;
+  let helloInterval: ReturnType<typeof setInterval> | null = null;
 
   const ch: UnifiedChannel = {
-    isHost: false,
-    ready: false,
-    onmessage: null,
-    onpeerjoin: null,
-    onpeerleave: null,
-    onready: null,
-    onerror: null,
+    isHost: false, ready: false,
+    onmessage: null, onpeerjoin: null, onpeerleave: null, onready: null, onerror: null,
     postMessage: (msg) => {
       if (conn && conn.open) { try { conn.send(msg); } catch { void 0; } }
     },
     close: () => {
+      if (connectTimeout) clearTimeout(connectTimeout);
+      if (helloInterval) clearInterval(helloInterval);
       try { if (conn) conn.close(); } catch { void 0; }
       try { peer.destroy(); } catch { void 0; }
     },
@@ -100,15 +95,40 @@ export function createGuestChannel(code: string): UnifiedChannel {
 
   peer.on("open", () => {
     conn = peer.connect(PREFIX + code, { reliable: true });
+
+    connectTimeout = setTimeout(() => {
+      if (!conn || !conn.open) {
+        ch.onerror?.("Лобби не найдено. Проверь код.");
+        try { peer.destroy(); } catch { void 0; }
+      }
+    }, 8000);
+
     conn.on("open", () => {
+      if (connectTimeout) clearTimeout(connectTimeout);
       (ch as { ready: boolean }).ready = true;
       ch.onready?.();
+
+      if (helloInterval) clearInterval(helloInterval);
+      helloInterval = setInterval(() => {
+        if (conn && conn.open) {
+          try { conn.send({ t: "ping", ts: Date.now() }); } catch { void 0; }
+        }
+      }, 3000);
     });
     conn.on("data", (data) => { if (ch.onmessage) ch.onmessage({ data }); });
-    conn.on("close", () => ch.onpeerleave?.("host"));
-    conn.on("error", (err) => ch.onerror?.(err.message || String(err)));
+    conn.on("close", () => { ch.onpeerleave?.("host"); });
+    conn.on("error", (err) => {
+      ch.onerror?.("Соединение разорвано: " + ((err as Error).message || ""));
+    });
   });
-  peer.on("error", (err) => ch.onerror?.(err.message || String(err)));
+  peer.on("error", (err) => {
+    const msg = (err as Error).message || String(err);
+    if (msg.includes("unavailable") || msg.includes("Could not connect to peer")) {
+      ch.onerror?.("Лобби не найдено. Проверь код.");
+    } else {
+      ch.onerror?.("Ошибка: " + msg);
+    }
+  });
 
   return ch;
 }

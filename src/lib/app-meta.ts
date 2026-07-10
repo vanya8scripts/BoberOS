@@ -77,6 +77,9 @@ export const APP_META: Record<AppId, AppMeta> = {
   boberspeedtest: { id: "boberspeedtest", name: "BoberSpeedtest", color: "from-green-500 to-emerald-700", defaultWidth: 560, defaultHeight: 520, minWidth: 400, minHeight: 400, source: "store", resizable: true },
   boberchess: { id: "boberchess", name: "Шахматы Бобра", color: "from-zinc-700 to-amber-900", defaultWidth: 640, defaultHeight: 660, minWidth: 460, minHeight: 500, source: "spim", resizable: true },
   snake3d: { id: "snake3d", name: "Змейка 3D", color: "from-emerald-500 to-green-800", defaultWidth: 560, defaultHeight: 620, minWidth: 400, minHeight: 500, source: "spim", resizable: true },
+  globalchat: { id: "globalchat", name: "Глобальный чат", color: "from-cyan-500 to-blue-700", defaultWidth: 420, defaultHeight: 580, minWidth: 320, minHeight: 400, source: "system", resizable: true },
+  arena3d: { id: "arena3d", name: "Бобр: Арена 3D", color: "from-fuchsia-600 to-purple-900", defaultWidth: 800, defaultHeight: 600, minWidth: 560, minHeight: 420, source: "spim", resizable: true },
+  towerdefense: { id: "towerdefense", name: "Защита Плотины", color: "from-amber-600 to-green-800", defaultWidth: 820, defaultHeight: 600, minWidth: 560, minHeight: 440, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [
@@ -94,4 +97,5 @@ export const PREINSTALLED: AppId[] = [
   "registryeditor",
   "gallery",
   "taskmanager",
+  "globalchat",
 ];
