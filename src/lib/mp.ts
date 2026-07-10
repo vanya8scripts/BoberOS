@@ -1,8 +1,7 @@
 "use client";
 
-import Peer, { DataConnection } from "peerjs";
-
-const PREFIX = "boberos-v2-";
+const BASE = "https://ntfy.sh";
+const PREFIX = "boberos-mp-";
 
 export interface UnifiedChannel {
   postMessage: (msg: unknown) => void;
@@ -16,119 +15,126 @@ export interface UnifiedChannel {
   readonly ready: boolean;
 }
 
+const seenMsgs = new Map<string, number>();
+function isDuplicate(id: string): boolean {
+  const now = Date.now();
+  const last = seenMsgs.get(id);
+  if (last !== undefined && now - last < 10000) return true;
+  seenMsgs.set(id, now);
+  if (seenMsgs.size > 500) {
+    const arr = Array.from(seenMsgs.entries());
+    seenMsgs.clear();
+    arr.slice(-200).forEach(([k, v]) => seenMsgs.set(k, v));
+  }
+  return false;
+}
+
+function pollTopic(topic: string, onMsg: (data: unknown) => void, onErr: () => void): () => void {
+  let stopped = false;
+  let since = "all";
+  const poll = async () => {
+    if (stopped) return;
+    try {
+      const url = `${BASE}/${topic}/json?since=${since}&poll=1`;
+      const res = await fetch(url);
+      if (!res.ok) { onErr(); return; }
+      const text = await res.text();
+      const lines = text.trim().split("\n").filter(Boolean);
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line);
+          if (obj.event === "message" && obj.message) {
+            since = obj.id;
+            try {
+              const data = JSON.parse(obj.message);
+              if (data._msgId && isDuplicate(data._msgId)) continue;
+              onMsg(data);
+            } catch { void 0; }
+          }
+        } catch { void 0; }
+      }
+    } catch { onErr(); }
+  };
+  poll();
+  const iv = setInterval(poll, 1500);
+  return () => { stopped = true; clearInterval(iv); };
+}
+
+function sendToTopic(topic: string, msg: unknown): void {
+  const enriched = { ...(msg as Record<string, unknown>), _msgId: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}` };
+  fetch(`${BASE}/${topic}`, { method: "POST", body: JSON.stringify(enriched) }).catch(() => void 0);
+}
+
 export function createHostChannel(code: string): UnifiedChannel {
-  const peer = new Peer(PREFIX + code, {
-    config: { iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-      { urls: "stun:stun2.l.google.com:19302" },
-      { urls: "stun:stun3.l.google.com:19302" },
-    ]},
-  });
-  const conns = new Map<string, DataConnection>();
+  const topic = PREFIX + code;
+  let ready = false;
+  let stopPoll: (() => void) | null = null;
+  const knownPeers = new Set<string>();
 
   const ch: UnifiedChannel = {
     isHost: true, ready: false,
     onmessage: null, onpeerjoin: null, onpeerleave: null, onready: null, onerror: null,
-    postMessage: (msg) => {
-      conns.forEach((c) => { if (c.open) { try { c.send(msg); } catch { void 0; } } });
-    },
-    close: () => {
-      conns.forEach((c) => { try { c.close(); } catch { void 0; } });
-      try { peer.destroy(); } catch { void 0; }
-    },
+    postMessage: (msg) => { sendToTopic(topic, msg); },
+    close: () => { if (stopPoll) stopPoll(); },
   };
 
-  peer.on("open", () => {
+  setTimeout(() => {
+    ready = true;
     (ch as { ready: boolean }).ready = true;
     ch.onready?.();
-  });
-  peer.on("error", (err) => {
-    const msg = (err as Error).message || String(err);
-    if (msg.includes("unavailable") || msg.includes("taken")) {
-      ch.onerror?.("ID занят. Попробуй другой код.");
-    }
-  });
+  }, 100);
 
-  peer.on("connection", (conn) => {
-    conn.on("open", () => {
-      conns.set(conn.peer, conn);
-      ch.onpeerjoin?.(conn.peer);
-    });
-    conn.on("data", (data) => {
-      if (ch.onmessage) ch.onmessage({ data });
-      conns.forEach((c) => {
-        if (c !== conn && c.open) { try { c.send(data); } catch { void 0; } }
-      });
-    });
-    conn.on("close", () => { conns.delete(conn.peer); ch.onpeerleave?.(conn.peer); });
-    conn.on("error", () => { conns.delete(conn.peer); ch.onpeerleave?.(conn.peer); });
-  });
+  stopPoll = pollTopic(topic, (data) => {
+    const msg = data as Record<string, unknown>;
+    if (msg.t === "hello" && typeof msg.id === "string") {
+      if (!knownPeers.has(msg.id)) {
+        knownPeers.add(msg.id);
+        ch.onpeerjoin?.(msg.id);
+      }
+    }
+    if (msg.t === "bye" && typeof msg.id === "string") {
+      if (knownPeers.has(msg.id)) {
+        knownPeers.delete(msg.id);
+        ch.onpeerleave?.(msg.id);
+      }
+    }
+    ch.onmessage?.({ data: msg });
+  }, () => void 0);
 
   return ch;
 }
 
 export function createGuestChannel(code: string): UnifiedChannel {
-  const peer = new Peer({
-    config: { iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-    ]},
-  });
-  let conn: DataConnection | null = null;
-  let connectTimeout: ReturnType<typeof setTimeout> | null = null;
-  let helloInterval: ReturnType<typeof setInterval> | null = null;
+  const topic = PREFIX + code;
+  let stopPoll: (() => void) | null = null;
+  let ready = false;
+  let foundHost = false;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   const ch: UnifiedChannel = {
     isHost: false, ready: false,
     onmessage: null, onpeerjoin: null, onpeerleave: null, onready: null, onerror: null,
-    postMessage: (msg) => {
-      if (conn && conn.open) { try { conn.send(msg); } catch { void 0; } }
-    },
-    close: () => {
-      if (connectTimeout) clearTimeout(connectTimeout);
-      if (helloInterval) clearInterval(helloInterval);
-      try { if (conn) conn.close(); } catch { void 0; }
-      try { peer.destroy(); } catch { void 0; }
-    },
+    postMessage: (msg) => { sendToTopic(topic, msg); },
+    close: () => { if (stopPoll) stopPoll(); if (timeoutId) clearTimeout(timeoutId); },
   };
 
-  peer.on("open", () => {
-    conn = peer.connect(PREFIX + code, { reliable: true });
-
-    connectTimeout = setTimeout(() => {
-      if (!conn || !conn.open) {
-        ch.onerror?.("Лобби не найдено. Проверь код.");
-        try { peer.destroy(); } catch { void 0; }
-      }
-    }, 8000);
-
-    conn.on("open", () => {
-      if (connectTimeout) clearTimeout(connectTimeout);
+  stopPoll = pollTopic(topic, (data) => {
+    const msg = data as Record<string, unknown>;
+    if (!foundHost && msg.t === "hello" && msg._isHost) {
+      foundHost = true;
+      ready = true;
       (ch as { ready: boolean }).ready = true;
+      if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
       ch.onready?.();
-
-      if (helloInterval) clearInterval(helloInterval);
-      helloInterval = setInterval(() => {
-        if (conn && conn.open) {
-          try { conn.send({ t: "ping", ts: Date.now() }); } catch { void 0; }
-        }
-      }, 3000);
-    });
-    conn.on("data", (data) => { if (ch.onmessage) ch.onmessage({ data }); });
-    conn.on("close", () => { ch.onpeerleave?.("host"); });
-    conn.on("error", (err) => {
-      ch.onerror?.("Соединение разорвано: " + ((err as Error).message || ""));
-    });
-  });
-  peer.on("error", (err) => {
-    const msg = (err as Error).message || String(err);
-    if (msg.includes("unavailable") || msg.includes("Could not connect to peer")) {
-      ch.onerror?.("Лобби не найдено. Проверь код.");
-    } else {
-      ch.onerror?.("Ошибка: " + msg);
     }
-  });
+    ch.onmessage?.({ data: msg });
+  }, () => void 0);
+
+  timeoutId = setTimeout(() => {
+    if (!foundHost) {
+      ch.onerror?.("Лобби не найдено. Проверь код.");
+    }
+  }, 8000);
 
   return ch;
 }

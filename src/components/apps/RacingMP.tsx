@@ -819,6 +819,8 @@ export function RacingMP() {
     }
   }, [beginRace, determineHost, sendNet, setPhaseSync]);
 
+  const hbR = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const setupChannel = useCallback((code: string, isHost: boolean) => {
     if (channelRef.current) {
       try {
@@ -826,6 +828,7 @@ export function RacingMP() {
         channelRef.current.close();
       } catch { void 0; }
     }
+    if (hbR.current) { clearInterval(hbR.current); hbR.current = null; }
     lobbyRef.current = code;
     knownHostRef.current = "";
     lastHostMsgAtRef.current = 0;
@@ -833,12 +836,22 @@ export function RacingMP() {
     const ch = isHost ? createHostChannel(code) : createGuestChannel(code);
     channelRef.current = ch;
     ch.onmessage = (ev: { data: unknown }) => handleNet(ev.data as NetMsg);
-    ch.onready = () => {
-      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code });
+    ch.onpeerjoin = () => {
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code, _isHost: isHost } as NetMsg & { _isHost: boolean });
     };
-    ch.onpeerjoin = () => { void 0; };
+    ch.onready = () => {
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code, _isHost: isHost } as NetMsg & { _isHost: boolean });
+      if (hbR.current) clearInterval(hbR.current);
+      hbR.current = setInterval(() => {
+        sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, color: colorRef.current, lobby: code, _isHost: isHost } as NetMsg & { _isHost: boolean });
+      }, 2000);
+    };
     ch.onpeerleave = (id: string) => { racersRef.current.delete(id); };
-    ch.onerror = () => { void 0; };
+    ch.onerror = (err: string) => {
+      if (!isHost) {
+        console.error("MP error:", err);
+      }
+    };
   }, [handleNet, sendNet]);
 
   const createLobby = useCallback(() => {

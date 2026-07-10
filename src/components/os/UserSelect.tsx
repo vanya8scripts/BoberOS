@@ -62,7 +62,7 @@ export function UserSelect() {
 
         <button
           onClick={() => setBootPhase("bios")}
-          className="absolute -bottom-24 right-0 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs text-white/60 backdrop-blur hover:bg-white/10 hover:text-white"
+          className="mt-10 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs text-white/60 backdrop-blur hover:bg-white/10 hover:text-white"
         >
           <Power className="h-3.5 w-3.5" /> {t("Перезагрузка", "Restart")}
         </button>

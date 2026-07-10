@@ -6,41 +6,49 @@ import { useOS } from "@/lib/os-store";
 
 interface Msg { id: string; name: string; avatar: string; text: string; ts: number; }
 
-const TOPIC = "boberos-global-chat-v1";
+const TOPIC = "boberos-global-chat-v2";
 
 export function GlobalChat() {
   const userName = useOS((s) => s.userName);
   const userAvatar = useOS((s) => s.userAvatar);
-  const customAvatar = useOS((s) => s.customAvatar);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [online, setOnline] = useState(1);
   const [connected, setConnected] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const esRef = useRef<EventSource | null>(null);
   const seenIds = useRef<Set<string>>(new Set());
+  const sinceRef = useRef<string>("all");
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const es = new EventSource(`https://ntfy.sh/${TOPIC}/sse`);
-    esRef.current = es;
-    es.onopen = () => setConnected(true);
-    es.onerror = () => setConnected(false);
-    es.onmessage = (ev) => {
+    const poll = async () => {
       try {
-        const data = JSON.parse(ev.data);
-        if (data.event !== "message" || !data.message) return;
-        const msg: Msg = JSON.parse(data.message);
-        if (seenIds.current.has(msg.id)) return;
-        seenIds.current.add(msg.id);
-        if (seenIds.current.size > 200) {
-          const arr = Array.from(seenIds.current);
-          seenIds.current = new Set(arr.slice(-100));
+        const url = `https://ntfy.sh/${TOPIC}/json?since=${sinceRef.current}&poll=1`;
+        const res = await fetch(url);
+        if (!res.ok) { setConnected(false); return; }
+        setConnected(true);
+        const text = await res.text();
+        const lines = text.trim().split("\n").filter(Boolean);
+        for (const line of lines) {
+          try {
+            const obj = JSON.parse(line);
+            if (obj.event === "message" && obj.message) {
+              sinceRef.current = obj.id;
+              const msg: Msg = JSON.parse(obj.message);
+              if (seenIds.current.has(msg.id)) continue;
+              seenIds.current.add(msg.id);
+              if (seenIds.current.size > 300) {
+                const arr = Array.from(seenIds.current);
+                seenIds.current = new Set(arr.slice(-150));
+              }
+              setMessages((prev) => [...prev.slice(-49), msg]);
+            }
+          } catch { void 0; }
         }
-        setMessages((prev) => [...prev.slice(-49), msg]);
-        setOnline((n) => Math.max(n, Math.ceil((Date.now() - msg.ts) / 1000 < 60 ? n + 0 : n)));
-      } catch { void 0; }
+      } catch { setConnected(false); }
     };
-    return () => { es.close(); };
+    poll();
+    pollRef.current = setInterval(poll, 2000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
   useEffect(() => {
@@ -49,11 +57,11 @@ export function GlobalChat() {
 
   const send = () => {
     const text = input.trim();
-    if (!text || !connected) return;
+    if (!text) return;
     const msg: Msg = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       name: userName || "Аноним",
-      avatar: customAvatar ? "" : userAvatar,
+      avatar: userAvatar || "🐹",
       text: text.slice(0, 500),
       ts: Date.now(),
     };
@@ -74,11 +82,11 @@ export function GlobalChat() {
           <h1 className="text-sm font-bold">Глобальный чат BoberOS</h1>
           <p className="flex items-center gap-1 text-[11px] text-white/70">
             <span className={`h-2 w-2 rounded-full ${connected ? "bg-green-400" : "bg-rose-400"}`} />
-            {connected ? "Подключено" : "Подключение..."} · через ntfy.sh
+            {connected ? "Подключено" : "Подключение..."} · между всеми устройствами мира
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs">
-          <Users className="h-3.5 w-3.5" /> {online} онлайн
+          <Users className="h-3.5 w-3.5" /> {Math.min(messages.length + 1, 99)}+
         </div>
       </div>
 
@@ -118,7 +126,7 @@ export function GlobalChat() {
         />
         <button
           onClick={send}
-          disabled={!input.trim() || !connected}
+          disabled={!input.trim()}
           className="grid h-9 w-9 place-items-center rounded-full bg-cyan-500 text-white hover:bg-cyan-600 disabled:opacity-40"
         >
           <Send className="h-4 w-4" />

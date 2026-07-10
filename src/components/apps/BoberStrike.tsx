@@ -922,6 +922,7 @@ export function BoberStrike() {
         channelRef.current.close();
       } catch { void 0; }
     }
+    if (heartbeatRef.current) { clearInterval(heartbeatRef.current); heartbeatRef.current = null; }
     lobbyRef.current = code;
     knownHostRef.current = "";
     lastRoundMsgAtRef.current = 0;
@@ -932,23 +933,24 @@ export function BoberStrike() {
     channelRef.current = ch;
     ch.onmessage = (ev: { data: unknown }) => handleNet(ev.data as NetMsg);
     ch.onpeerjoin = (id: string) => {
-      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current, _isHost: isHost } as NetMsg & { _isHost: boolean });
     };
     ch.onpeerleave = (id: string) => {
       playersRef.current.delete(id);
       setLobbyPlayers((prev) => prev.filter((p) => p.id !== id));
     };
     ch.onready = () => {
-      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current, _isHost: isHost } as NetMsg & { _isHost: boolean });
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       heartbeatRef.current = setInterval(() => {
-        sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
+        sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current, _isHost: isHost } as NetMsg & { _isHost: boolean });
       }, 2000);
     };
     ch.onerror = (err: string) => {
       if (!isHost) {
         setErrorMsg(err.includes("не найдено") || err.includes("not found") ? "Лобби не найдено. Проверь код." : "Ошибка подключения: " + err);
         setTimeout(() => setErrorMsg(null), 5000);
+        if (heartbeatRef.current) { clearInterval(heartbeatRef.current); heartbeatRef.current = null; }
         setPhaseSync("menu");
       }
     };
