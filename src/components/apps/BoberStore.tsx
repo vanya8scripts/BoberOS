@@ -170,20 +170,6 @@ export function BoberStore() {
             );
           })}
         </div>
-
-        <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-zinc-400">Скоро в BoberStore</p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {COMING_SOON_APPS.map((a) => (
-            <div key={a.name} className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-center opacity-70">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-zinc-200 text-2xl">{a.emoji}</div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-600">{a.name}</p>
-                <p className="text-[10px] text-zinc-400">{a.category}</p>
-              </div>
-              <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[9px] font-medium text-zinc-500">Скоро...</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

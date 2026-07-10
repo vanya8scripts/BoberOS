@@ -70,6 +70,8 @@ export const APP_META: Record<AppId, AppMeta> = {
   tankbattle: { id: "tankbattle", name: "Танчики Бобра", color: "from-amber-600 to-yellow-800", defaultWidth: 640, defaultHeight: 600, minWidth: 440, minHeight: 440, source: "spim", resizable: true },
   galtaxis: { id: "galtaxis", name: "Галактика Бобра", color: "from-indigo-600 to-purple-900", defaultWidth: 480, defaultHeight: 680, minWidth: 380, minHeight: 560, source: "spim", resizable: true },
   bplatformer: { id: "bplatformer", name: "Приключения Бобра", color: "from-green-500 to-emerald-800", defaultWidth: 820, defaultHeight: 540, minWidth: 560, minHeight: 400, source: "spim", resizable: true },
+  beaversaga: { id: "beaversaga", name: "Сага о Бобре", color: "from-amber-600 to-red-900", defaultWidth: 760, defaultHeight: 600, minWidth: 480, minHeight: 500, source: "spim", resizable: true },
+  racingmp: { id: "racingmp", name: "БоброГонки MP", color: "from-rose-500 to-orange-700", defaultWidth: 800, defaultHeight: 580, minWidth: 520, minHeight: 420, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [

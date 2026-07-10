@@ -57,7 +57,9 @@ export type AppId =
   | "boberkart"
   | "tankbattle"
   | "galtaxis"
-  | "bplatformer";
+  | "bplatformer"
+  | "beaversaga"
+  | "racingmp";
 
 export type Language = "ru" | "en";
 

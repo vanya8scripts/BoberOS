@@ -115,6 +115,7 @@ interface OSState {
   withdrawToBoberSoft: (amount?: number) => void;
   withdrawToSpim: (amount?: number) => void;
   buyCyberBober: () => void;
+  spendSpim: (amount: number) => boolean;
   activateOS: () => void;
   activateWithKey: () => void;
 
@@ -145,7 +146,7 @@ function activeToUserState(s: OSState): UserStateData {
     darkMode: s.darkMode,
     volume: s.volume,
     keyboardLayout: s.keyboardLayout,
-    savedApps: s.savedApps,
+    savedApps: s.installedApps.filter((a) => !PREINSTALLED.includes(a)),
     bobersoftBalance: s.bobersoftBalance,
     spimBalance: s.spimBalance,
     bobercoinBalance: s.bobercoinBalance,
@@ -365,8 +366,12 @@ export const useOS = create<OSState>()(
       saveProgress: () => {
         const s = get();
         if (!s.currentUserId) return;
-        const data = activeToUserState(s);
-        set((st) => ({ userStates: { ...st.userStates, [s.currentUserId!]: data }, savedApps: data.savedApps }));
+        const currentSavedApps = s.installedApps.filter((a) => !PREINSTALLED.includes(a));
+        const data = { ...activeToUserState(s), savedApps: currentSavedApps };
+        set((st) => ({
+          userStates: { ...st.userStates, [s.currentUserId!]: data },
+          savedApps: currentSavedApps,
+        }));
       },
 
       hasUnsavedChanges: () => {
@@ -404,6 +409,13 @@ export const useOS = create<OSState>()(
             installedApps: s.installedApps.includes("cyberbober") ? s.installedApps : [...s.installedApps, "cyberbober"],
           };
         }),
+
+      spendSpim: (amount) => {
+        const s = get();
+        if (s.spimBalance < amount) return false;
+        set({ spimBalance: s.spimBalance - amount });
+        return true;
+      },
 
       activateOS: () =>
         set((s) => {

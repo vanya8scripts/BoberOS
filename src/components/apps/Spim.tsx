@@ -48,15 +48,8 @@ const GAMES: GameItem[] = [
   { appId: "tankbattle", price: 0, tagline: "Танчики в стиле Battle City. Защити плотину!", rating: 4.8, genre: "Аркада", size: "6 МБ", tag: "NEW" },
   { appId: "galtaxis", price: 0, tagline: "Космический шутер! Волны пришельцев и боссы.", rating: 4.6, genre: "Шутер", size: "5 МБ", tag: "NEW" },
   { appId: "bplatformer", price: 0, tagline: "Платформер как Mario. Прыгай на барсуков, собирай монеты.", rating: 4.7, genre: "Платформер", size: "8 МБ", tag: "NEW" },
-];
-
-const COMING_SOON_GAMES = [
-  { name: "Бобр: RPG", genre: "RPG", emoji: "⚔️" },
-  { name: "Among Beavers", genre: "Мультиплеер", emoji: "🤫" },
-  { name: "Шахматы Бобра", genre: "Логика", emoji: "♟️" },
-  { name: "Бобр-Тетрис 2", genre: "Головоломка", emoji: "🧩" },
-  { name: "Бобр: Выживание", genre: "Survival", emoji: "🏕️" },
-  { name: "Бобр-Стратегия", genre: "Стратегия", emoji: "🏰" },
+  { appId: "beaversaga", price: 600, tagline: "Сюжетная RPG-сага! Путешествие за Золотой Веткой. 3 концовки.", rating: 4.9, genre: "RPG / Сюжет", size: "6 МБ", tag: "HIT" },
+  { appId: "racingmp", price: 0, tagline: "Мультиплеер гонки! Создай лобби, позови друга по коду.", rating: 4.8, genre: "Гонки / Мультиплеер", size: "7 МБ", tag: "MP" },
 ];
 
 export function Spim() {
@@ -66,6 +59,7 @@ export function Spim() {
   const spimBalance = useOS((s) => s.spimBalance);
   const cyberboberOwned = useOS((s) => s.cyberboberOwned);
   const buyCyberBober = useOS((s) => s.buyCyberBober);
+  const spendSpim = useOS((s) => s.spendSpim);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [genre, setGenre] = useState("Все");
@@ -76,13 +70,22 @@ export function Spim() {
   const handleInstall = (game: GameItem) => {
     if (timers.current[game.appId]) return;
     if (installedApps.includes(game.appId)) return;
-    if (game.appId === "cyberbober" && !cyberboberOwned) {
-      if (spimBalance < game.price) {
-        setError(`Не хватает ${game.price - spimBalance} BBC. Выведи монеты на Спим в BoberCoin!`);
-        setTimeout(() => setError(null), 3500);
-        return;
+    if (game.price > 0) {
+      if (game.appId === "cyberbober" && !cyberboberOwned) {
+        if (spimBalance < game.price) {
+          setError(`Не хватает ${game.price - spimBalance} BBC. Выведи монеты на Спим в BoberCoin!`);
+          setTimeout(() => setError(null), 3500);
+          return;
+        }
+        buyCyberBober();
+      } else if (game.appId !== "cyberbober") {
+        if (spimBalance < game.price) {
+          setError(`Не хватает ${game.price - spimBalance} BBC. Выведи монеты на Спим в BoberCoin!`);
+          setTimeout(() => setError(null), 3500);
+          return;
+        }
+        if (!spendSpim(game.price)) return;
       }
-      buyCyberBober();
     }
     setError(null);
     setProgress((p) => ({ ...p, [game.appId]: 0 }));
@@ -176,20 +179,6 @@ export function Spim() {
             );
           })}
         </div>
-
-        <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-white/40">Скоро в Спим</p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {COMING_SOON_GAMES.map((g) => (
-            <div key={g.name} className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/5 p-4 text-center opacity-70">
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/5 text-3xl">{g.emoji}</div>
-              <div>
-                <p className="text-sm font-semibold text-white/70">{g.name}</p>
-                <p className="text-[10px] text-white/40">{g.genre}</p>
-              </div>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-medium text-white/50">Скоро...</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -213,6 +202,7 @@ function gameName(appId: AppId) {
     bober3d: "Бобр3D", parkour: "БоброПаркур", rungun: "Бобр: Штурм",
     voxelsandbox: "БобрКрафт", boberstrike: "БобрСтрайк",
     boberkart: "БоброКарт", tankbattle: "Танчики Бобра", galtaxis: "Галактика Бобра", bplatformer: "Приключения Бобра",
+    beaversaga: "Сага о Бобре", racingmp: "БоброГонки MP",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];
