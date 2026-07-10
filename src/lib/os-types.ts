@@ -62,7 +62,9 @@ export type AppId =
   | "racingmp"
   | "boberpiano"
   | "boberdice"
-  | "boberspeedtest";
+  | "boberspeedtest"
+  | "boberchess"
+  | "snake3d";
 
 export type Language = "ru" | "en";
 

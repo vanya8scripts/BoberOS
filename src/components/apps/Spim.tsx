@@ -50,6 +50,8 @@ const GAMES: GameItem[] = [
   { appId: "bplatformer", price: 550, tagline: "Платформер как Mario. Прыгай на барсуков, собирай монеты.", rating: 4.7, genre: "Платформер", size: "8 МБ", tag: "NEW" },
   { appId: "beaversaga", price: 600, tagline: "Сюжетная RPG-сага! Путешествие за Золотой Веткой. 3 концовки.", rating: 4.9, genre: "RPG / Сюжет", size: "6 МБ", tag: "HIT" },
   { appId: "racingmp", price: 0, tagline: "Мультиплеер гонки! Создай лобби, позови друга по коду.", rating: 4.8, genre: "Гонки / Мультиплеер", size: "7 МБ", tag: "MP" },
+  { appId: "boberchess", price: 300, tagline: "Шахматы vs ИИ! Полные правила, рокировка, взятие на проходе.", rating: 4.7, genre: "Логика", size: "4 МБ", tag: "NEW" },
+  { appId: "snake3d", price: 250, tagline: "Змейка в 3D-изометрии! Красивые кубы, растущая скорость.", rating: 4.6, genre: "Аркада", size: "3 МБ", tag: "3D" },
 ];
 
 export function Spim() {
@@ -203,6 +205,7 @@ function gameName(appId: AppId) {
     voxelsandbox: "БобрКрафт", boberstrike: "БобрСтрайк",
     boberkart: "БоброКарт", tankbattle: "Танчики Бобра", galtaxis: "Галактика Бобра", bplatformer: "Приключения Бобра",
     beaversaga: "Сага о Бобре", racingmp: "БоброГонки MP",
+    boberchess: "Шахматы Бобра", snake3d: "Змейка 3D",
     dinorunner: "БоброБег", sudoku: "Судоку Бобра", connect4: "Четыре в ряд", wordle: "БобрВорд",
   };
   return names[appId];

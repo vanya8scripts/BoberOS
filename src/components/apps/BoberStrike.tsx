@@ -931,10 +931,7 @@ export function BoberStrike() {
     channelRef.current = ch;
     ch.onmessage = (ev: { data: unknown }) => handleNet(ev.data as NetMsg);
     ch.onpeerjoin = (id: string) => {
-      setLobbyPlayers((prev) => {
-        if (prev.some((p) => p.id === id)) return prev;
-        return [...prev, { id, name: "Игрок", team: "spec" as Team }];
-      });
+      sendNet({ t: "hello", id: localIdRef.current, name: nameRef.current, team: teamRef.current, lobby: code, map: mapIdRef.current });
     };
     ch.onpeerleave = (id: string) => {
       playersRef.current.delete(id);

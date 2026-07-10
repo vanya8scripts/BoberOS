@@ -35,6 +35,7 @@ const ICONS: Record<AppId, LucideIcon> = {
   boberkart: Gamepad2, tankbattle: Crosshair, galtaxis: Gamepad2, bplatformer: Activity,
   beaversaga: BookOpen, racingmp: Gamepad2,
   boberpiano: Music, boberdice: Activity, boberspeedtest: Gauge,
+  boberchess: Grid3x3, snake3d: Gamepad2,
 };
 
 interface AppIconProps {

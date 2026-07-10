@@ -75,6 +75,8 @@ export const APP_META: Record<AppId, AppMeta> = {
   boberpiano: { id: "boberpiano", name: "BoberPiano", color: "from-fuchsia-500 to-purple-700", defaultWidth: 680, defaultHeight: 420, minWidth: 420, minHeight: 320, source: "store", resizable: true },
   boberdice: { id: "boberdice", name: "BoberDice", color: "from-emerald-500 to-teal-700", defaultWidth: 480, defaultHeight: 560, minWidth: 360, minHeight: 440, source: "store", resizable: true },
   boberspeedtest: { id: "boberspeedtest", name: "BoberSpeedtest", color: "from-green-500 to-emerald-700", defaultWidth: 560, defaultHeight: 520, minWidth: 400, minHeight: 400, source: "store", resizable: true },
+  boberchess: { id: "boberchess", name: "Шахматы Бобра", color: "from-zinc-700 to-amber-900", defaultWidth: 640, defaultHeight: 660, minWidth: 460, minHeight: 500, source: "spim", resizable: true },
+  snake3d: { id: "snake3d", name: "Змейка 3D", color: "from-emerald-500 to-green-800", defaultWidth: 560, defaultHeight: 620, minWidth: 400, minHeight: 500, source: "spim", resizable: true },
 };
 
 export const PREINSTALLED: AppId[] = [
